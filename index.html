@@ -110,7 +110,7 @@
   <div class="section-title">1 — Usage Trend</div>
   <div class="chart-row">
     <div class="chart-box">
-      <div class="chart-title">Weekly unique external users</div>
+      <div class="chart-title">Weekly interactions by platform</div>
       <div class="chart-container"><canvas id="chartUsers"></canvas></div>
     </div>
     <div class="chart-box">
@@ -179,25 +179,48 @@ document.addEventListener('DOMContentLoaded', function() {
   var gridColor = '#f0f0f0';
   var tickColor = '#9ca3af';
 
-  // Chart 1: Weekly unique users
+  // Chart 1: Weekly unique users — stacked area by platform
   new Chart(document.getElementById('chartUsers').getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: weeks,
-      datasets: [{
-        data: extUsers,
-        backgroundColor: '#3b82f6',
-        borderRadius: 6,
-        barPercentage: 0.6
-      }]
+      datasets: [
+        {
+          label: 'Web App',
+          data: webEvents,
+          borderColor: '#9ca3af',
+          backgroundColor: 'rgba(156,163,175,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        },
+        {
+          label: 'Claude MCP',
+          data: claudeCalls,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        },
+        {
+          label: 'ChatGPT MCP',
+          data: gptCalls,
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#374151', font: { size: 11 }, usePointStyle: true, pointStyle: 'circle', padding: 16 },
+          position: 'top'
+        }
+      },
       scales: {
-        x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
-        y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
+        x: { stacked: true, ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
+        y: { stacked: true, ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
       }
     }
   });
