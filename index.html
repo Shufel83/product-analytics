@@ -70,7 +70,22 @@
   .tag-mcp { background: #dbeafe; color: #1d4ed8; }
   .tag-web2 { background: #d1fae5; color: #065f46; }
   .migration-arrow { font-size: 12px; color: #059669; margin-top: 10px; }
+  .compare-row { display: flex; gap: 16px; margin-bottom: 40px; }
+  .compare-card {
+    flex: 1; background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 12px; padding: 20px 24px; text-align: center;
+  }
+  .compare-header { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; font-weight: 600; }
+  .compare-vals { display: flex; justify-content: center; align-items: baseline; gap: 12px; }
+  .compare-q1 { font-size: 22px; font-weight: 600; color: #9ca3af; }
+  .compare-arrow { font-size: 14px; color: #6b7280; }
+  .compare-q2 { font-size: 28px; font-weight: 700; color: #111827; }
+  .compare-delta { font-size: 12px; font-weight: 600; margin-top: 6px; }
+  .delta-up { color: #059669; }
+  .delta-down { color: #dc2626; }
+  .delta-neutral { color: #6b7280; }
   @media (max-width: 768px) {
+    .compare-row { flex-direction: column; }
     .kpi-row, .chart-row { flex-direction: column; }
     .spotlight { flex-direction: column; }
     .spotlight-text { flex: unset; }
@@ -103,6 +118,55 @@
     <div class="kpi-value">3</div>
     <div class="kpi-label">Active platforms</div>
     <div class="kpi-sub">Web App · Web 2.0 (AI) · MCP</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Q1 → Q2 Comparison</div>
+  <div class="compare-row">
+    <div class="compare-card">
+      <div class="compare-header">External accounts</div>
+      <div class="compare-vals">
+        <span class="compare-q1">18</span>
+        <span class="compare-arrow">→</span>
+        <span class="compare-q2">17</span>
+      </div>
+      <div class="compare-delta delta-neutral">−1 (10 new, 11 churned)</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Total active days</div>
+      <div class="compare-vals">
+        <span class="compare-q1">44</span>
+        <span class="compare-arrow">→</span>
+        <span class="compare-q2">75</span>
+      </div>
+      <div class="compare-delta delta-up">+70%</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Avg days / user</div>
+      <div class="compare-vals">
+        <span class="compare-q1">2.4</span>
+        <span class="compare-arrow">→</span>
+        <span class="compare-q2">4.4</span>
+      </div>
+      <div class="compare-delta delta-up">+83%</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Platforms</div>
+      <div class="compare-vals">
+        <span class="compare-q1">1</span>
+        <span class="compare-arrow">→</span>
+        <span class="compare-q2">3</span>
+      </div>
+      <div class="compare-delta delta-up">Web → Web + AI + MCP</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header">Q1 retention</div>
+      <div class="compare-vals">
+        <span class="compare-q2">7<span style="font-size:16px;color:#6b7280;font-weight:400"> / 18</span></span>
+      </div>
+      <div class="compare-delta delta-neutral">39% carried into Q2</div>
+    </div>
   </div>
 </div>
 
