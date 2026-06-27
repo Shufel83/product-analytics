@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lizo.ai — Q2 2026 External Usage</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f8f9fb;
+    color: #1f2937;
+    padding: 40px 32px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; color: #111827; }
+  .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 40px; }
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 14px; font-weight: 600; color: #6b7280;
+    text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 20px;
+  }
+  .kpi-row { display: flex; gap: 20px; margin-bottom: 40px; }
+  .kpi-card {
+    flex: 1; background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 12px; padding: 24px;
+  }
+  .kpi-value { font-size: 36px; font-weight: 700; color: #111827; }
+  .kpi-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  .kpi-sub { font-size: 12px; color: #059669; margin-top: 8px; }
+  .chart-row { display: flex; gap: 20px; margin-bottom: 24px; }
+  .chart-box {
+    flex: 1; background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 12px; padding: 24px;
+  }
+  .chart-box.full { flex: unset; width: 100%; }
+  .chart-title { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 16px; }
+  .chart-container { position: relative; width: 100%; height: 240px; }
+  .chart-container.tall { height: 280px; }
+  .heatmap-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .heatmap-table th {
+    text-align: left; padding: 8px 10px; color: #6b7280;
+    font-weight: 500; border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+  }
+  .heatmap-table td {
+    padding: 6px 10px; border-bottom: 1px solid #f3f4f6; white-space: nowrap;
+  }
+  .heatmap-table .user-name { color: #111827; font-weight: 500; min-width: 160px; }
+  .heatmap-table .company { color: #6b7280; min-width: 120px; }
+  .heatmap-cell { width: 60px; text-align: center; border-radius: 4px; font-size: 11px; }
+  .heat-0 { background: transparent; color: #d1d5db; }
+  .heat-1 { background: #dbeafe; color: #1e40af; }
+  .heat-2 { background: #93c5fd; color: #1e3a8a; }
+  .heat-3 { background: #3b82f6; color: #fff; }
+  .heat-4 { background: #2563eb; color: #fff; }
+  .heat-5 { background: #1d4ed8; color: #fff; }
+  .spotlight {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+    border: 1px solid #c7d2fe; border-radius: 12px; padding: 28px;
+    display: flex; gap: 32px; align-items: flex-start;
+  }
+  .spotlight-text { flex: 0 0 320px; }
+  .spotlight-chart { flex: 1; }
+  .spotlight h3 { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+  .spotlight p { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+  .spotlight .highlight { color: #2563eb; font-weight: 600; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-web { background: #f3f4f6; color: #374151; }
+  .tag-claude { background: #dbeafe; color: #1d4ed8; }
+  .tag-gpt { background: #ede9fe; color: #7c3aed; }
+  .migration-arrow { font-size: 12px; color: #059669; margin-top: 10px; }
+  @media (max-width: 768px) {
+    .kpi-row, .chart-row { flex-direction: column; }
+    .spotlight { flex-direction: column; }
+    .spotlight-text { flex: unset; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Q2 2026 — External Usage</h1>
+<p class="subtitle">lizo.ai product adoption across web app, Claude MCP, and ChatGPT MCP | April 1 – June 28</p>
+
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-value">15</div>
+    <div class="kpi-label">External accounts</div>
+    <div class="kpi-sub">across 8 companies</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">2,167</div>
+    <div class="kpi-label">Total interactions</div>
+    <div class="kpi-sub">web + MCP combined</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">3</div>
+    <div class="kpi-label">Retained 5+ weeks</div>
+    <div class="kpi-sub">Jim Oates, Marc, N. Brown</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">100%</div>
+    <div class="kpi-label">MCP by end of Q2</div>
+    <div class="kpi-sub">zero web app usage in June</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">1 — Usage Trend</div>
+  <div class="chart-row">
+    <div class="chart-box">
+      <div class="chart-title">Weekly unique external users</div>
+      <div class="chart-container"><canvas id="chartUsers"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Weekly total interactions</div>
+      <div class="chart-container"><canvas id="chartVolume"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">2 — Platform Migration</div>
+  <div class="chart-box full">
+    <div class="chart-title">Interactions by channel — week over week</div>
+    <div class="chart-container tall"><canvas id="chartPlatform"></canvas></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">3 — Retention</div>
+  <div class="chart-box full" style="overflow-x:auto;">
+    <div class="chart-title">Activity heatmap — each cell = interactions that week</div>
+    <table class="heatmap-table" id="heatmapTable"></table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">4 — Top Users by Volume</div>
+  <div class="chart-box full">
+    <div class="chart-title">Total interactions across all channels</div>
+    <div class="chart-container tall"><canvas id="chartTopUsers"></canvas></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">5 — Adoption Story: Jim Oates, Reichard Capital</div>
+  <div class="spotlight">
+    <div class="spotlight-text">
+      <h3>Web → AI-native</h3>
+      <p>Jim started on the web app in <span class="highlight">March</span>, explored heavily through <span class="highlight">April</span>, then migrated entirely to <span class="highlight">ChatGPT MCP</span> in May.</p>
+      <p>By June, he was running <span class="highlight">85 tool calls in a single day</span> — deep asset-level comps on live deals.</p>
+      <p style="margin-top:12px"><span class="highlight">875 total interactions</span> across 7 weeks. The team also started using it — Rose and John Lauder logged in independently.</p>
+      <div class="migration-arrow">Web app (Mar–Apr) → ChatGPT MCP (May–Jun) → Team expansion</div>
+    </div>
+    <div class="spotlight-chart">
+      <div class="chart-container"><canvas id="chartJim"></canvas></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  var weeks = ['Apr 6','Apr 13','Apr 20','Apr 27','May 4','May 11','May 18','May 25','Jun 1','Jun 8','Jun 15','Jun 22'];
+  var extUsers = [3, 6, 7, 6, 5, 4, 5, 1, 6, 2, 1, 3];
+  var webEvents = [341, 685, 187, 225, 173, 56, 21, 0, 72, 1, 43, 16];
+  var claudeCalls = [0, 0, 0, 4, 31, 19, 36, 16, 31, 0, 0, 8];
+  var gptCalls = [0, 0, 0, 0, 0, 0, 49, 0, 106, 34, 5, 0];
+  var totalVol = [];
+  for (var i = 0; i < weeks.length; i++) {
+    totalVol.push(webEvents[i] + claudeCalls[i] + gptCalls[i]);
+  }
+
+  var gridColor = '#f0f0f0';
+  var tickColor = '#9ca3af';
+
+  // Chart 1: Weekly unique users
+  new Chart(document.getElementById('chartUsers').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [{
+        data: extUsers,
+        backgroundColor: '#3b82f6',
+        borderRadius: 6,
+        barPercentage: 0.6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
+      }
+    }
+  });
+
+  // Chart 2: Weekly volume
+  new Chart(document.getElementById('chartVolume').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [{
+        data: totalVol,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#3b82f6'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
+      }
+    }
+  });
+
+  // Chart 3: Platform stacked area
+  new Chart(document.getElementById('chartPlatform').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [
+        {
+          label: 'Web App',
+          data: webEvents,
+          borderColor: '#9ca3af',
+          backgroundColor: 'rgba(156,163,175,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        },
+        {
+          label: 'Claude MCP',
+          data: claudeCalls,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        },
+        {
+          label: 'ChatGPT MCP',
+          data: gptCalls,
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.25)',
+          fill: true, tension: 0.3, pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#374151', font: { size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 20 },
+          position: 'top'
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
+        y: { stacked: true, ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
+      }
+    }
+  });
+
+  // Retention heatmap
+  var users = [
+    { name: 'Jim Oates', company: 'Reichard', data: [182,347,55,2,0,45,56,0,106,34,48,0], channels: ['web','gpt'] },
+    { name: 'Marc', company: 'Prizma', data: [0,189,26,0,0,9,32,16,14,0,0,0], channels: ['web','claude'] },
+    { name: 'Daniel', company: 'InvestnJoy', data: [114,0,25,107,25,2,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Michael', company: 'HPI', data: [0,65,0,0,95,0,0,0,0,0,0,0], channels: ['web','claude'] },
+    { name: 'R. Welch', company: 'Kaplan', data: [45,0,0,59,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'N. Brown', company: 'AL Apts', data: [0,25,0,0,0,0,8,0,8,0,0,16], channels: ['web','claude'] },
+    { name: 'Kate', company: 'HPI', data: [0,50,0,8,0,0,0,0,6,1,0,0], channels: ['web','claude'] },
+    { name: 'Uriya', company: 'ERE', data: [0,0,16,48,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Motty', company: 'Deergrow', data: [0,0,0,0,0,0,0,0,62,0,0,0], channels: ['web','claude'] },
+    { name: 'Amit', company: 'ERE', data: [0,0,54,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Teddy', company: 'HH Redstone', data: [0,0,0,0,10,0,4,0,4,0,0,7], channels: ['web','claude'] },
+    { name: 'M. Crane', company: 'Sage Vent.', data: [0,0,0,0,35,0,0,0,0,0,0,1], channels: ['web','claude'] },
+    { name: 'Jack', company: 'Mentis CP', data: [0,0,0,0,31,10,0,0,0,0,0,0], channels: ['web','claude'] }
+  ];
+
+  function heatClass(v) {
+    if (v === 0) return 'heat-0';
+    if (v <= 10) return 'heat-1';
+    if (v <= 30) return 'heat-2';
+    if (v <= 60) return 'heat-3';
+    if (v <= 100) return 'heat-4';
+    return 'heat-5';
+  }
+
+  function channelTags(ch) {
+    var out = '';
+    for (var j = 0; j < ch.length; j++) {
+      if (ch[j] === 'web') out += '<span class="tag tag-web">Web</span> ';
+      if (ch[j] === 'claude') out += '<span class="tag tag-claude">Claude</span> ';
+      if (ch[j] === 'gpt') out += '<span class="tag tag-gpt">ChatGPT</span> ';
+    }
+    return out;
+  }
+
+  var table = document.getElementById('heatmapTable');
+  var html = '<tr><th>User</th><th>Company</th>';
+  for (var w = 0; w < weeks.length; w++) {
+    html += '<th style="text-align:center;font-size:11px;">' + weeks[w] + '</th>';
+  }
+  html += '<th>Total</th><th>Channels</th></tr>';
+  for (var u = 0; u < users.length; u++) {
+    var total = 0;
+    for (var d = 0; d < users[u].data.length; d++) total += users[u].data[d];
+    html += '<tr><td class="user-name">' + users[u].name + '</td><td class="company">' + users[u].company + '</td>';
+    for (var d = 0; d < users[u].data.length; d++) {
+      var v = users[u].data[d];
+      html += '<td class="heatmap-cell ' + heatClass(v) + '">' + (v || '') + '</td>';
+    }
+    html += '<td style="text-align:right;font-weight:600;color:#111827;padding-left:16px;">' + total + '</td>';
+    html += '<td style="padding-left:12px;">' + channelTags(users[u].channels) + '</td>';
+    html += '</tr>';
+  }
+  table.innerHTML = html;
+
+  // Chart 4: Top users horizontal bar
+  var topNames = ['Jim Oates', 'Marc (Prizma)', 'Daniel (InvestnJoy)', 'Michael (HPI)', 'R. Welch (Kaplan)'];
+  var topTotals = [875, 295, 273, 255, 104];
+  var topColors = ['#8b5cf6', '#3b82f6', '#9ca3af', '#9ca3af', '#9ca3af'];
+
+  new Chart(document.getElementById('chartTopUsers').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: topNames,
+      datasets: [{
+        data: topTotals,
+        backgroundColor: topColors,
+        borderRadius: 6,
+        barPercentage: 0.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor }, grid: { color: gridColor }, beginAtZero: true },
+        y: { ticks: { color: '#374151', font: { size: 13 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Chart 5: Jim Oates spotlight
+  new Chart(document.getElementById('chartJim').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [
+        {
+          label: 'Web App',
+          data: [182, 347, 55, 2, 0, 45, 7, 0, 0, 0, 43, 0],
+          backgroundColor: 'rgba(156,163,175,0.5)',
+          borderRadius: 4,
+          barPercentage: 0.7
+        },
+        {
+          label: 'ChatGPT MCP',
+          data: [0, 0, 0, 0, 0, 0, 49, 0, 106, 34, 5, 0],
+          backgroundColor: 'rgba(139,92,246,0.5)',
+          borderRadius: 4,
+          barPercentage: 0.7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#374151', font: { size: 11 }, usePointStyle: true, pointStyle: 'circle', padding: 16 },
+          position: 'top'
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: tickColor, font: { size: 10 } }, grid: { color: gridColor } },
+        y: { stacked: true, ticks: { color: tickColor }, grid: { color: gridColor }, beginAtZero: true }
+      }
+    }
+  });
+
+});
+</script>
+</body>
+</html>
