@@ -96,16 +96,16 @@
 <div class="container">
 
 <h1>Q2 2026 — External Usage</h1>
-<p class="subtitle">lizo.ai product adoption across Web App, Web 2.0 (AI), and MCP | April 1 – June 28</p>
+<p class="subtitle">lizo.ai product adoption across Web App, Web 2.0 (AI), and MCP | April 1 - July 5</p>
 
 <div class="kpi-row">
   <div class="kpi-card">
-    <div class="kpi-value">17</div>
+    <div class="kpi-value">18</div>
     <div class="kpi-label">External accounts</div>
-    <div class="kpi-sub">across 12 companies</div>
+    <div class="kpi-sub">across 13 companies</div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-value">75</div>
+    <div class="kpi-value">78</div>
     <div class="kpi-label">Total active days</div>
     <div class="kpi-sub">across all platforms</div>
   </div>
@@ -129,25 +129,25 @@
       <div class="compare-vals">
         <span class="compare-q1">18</span>
         <span class="compare-arrow">→</span>
-        <span class="compare-q2">17</span>
+        <span class="compare-q2">18</span>
       </div>
-      <div class="compare-delta delta-neutral">−1 (10 new, 11 churned)</div>
+      <div class="compare-delta delta-neutral">0 (11 new, 11 churned)</div>
     </div>
     <div class="compare-card">
       <div class="compare-header">Total active days</div>
       <div class="compare-vals">
         <span class="compare-q1">44</span>
         <span class="compare-arrow">→</span>
-        <span class="compare-q2">75</span>
+        <span class="compare-q2">78</span>
       </div>
-      <div class="compare-delta delta-up">+70%</div>
+      <div class="compare-delta delta-up">+77%</div>
     </div>
     <div class="compare-card">
       <div class="compare-header">Avg days / user</div>
       <div class="compare-vals">
         <span class="compare-q1">2.4</span>
         <span class="compare-arrow">→</span>
-        <span class="compare-q2">4.4</span>
+        <span class="compare-q2">4.3</span>
       </div>
       <div class="compare-delta delta-up">+83%</div>
     </div>
@@ -224,11 +224,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
-  var weeks = ['Apr 6','Apr 13','Apr 20','Apr 27','May 4','May 11','May 18','May 25','Jun 1','Jun 8','Jun 15','Jun 22'];
-  var webDays = [6, 7, 10, 8, 7, 3, 3, 0, 5, 0, 0, 0];
-  var web2Days = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2];
-  var mcpDays = [0, 0, 0, 1, 6, 2, 8, 2, 7, 2, 2, 3];
-  var avgDays = [1.5, 1.4, 1.4, 1.3, 1.3, 1.3, 2.0, 2.0, 1.7, 2.0, 2.0, 1.3];
+  var weeks = ['Apr 6','Apr 13','Apr 20','Apr 27','May 4','May 11','May 18','May 25','Jun 1','Jun 8','Jun 15','Jun 22','Jun 30'];
+  var webDays = [6, 7, 10, 8, 7, 3, 3, 0, 5, 0, 0, 0, 0];
+  var web2Days = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1];
+  var mcpDays = [0, 0, 0, 1, 6, 2, 8, 2, 7, 2, 2, 3, 2];
+  var avgDays = [1.5, 1.4, 1.4, 1.3, 1.3, 1.3, 2.0, 2.0, 1.7, 2.0, 2.0, 1.3, 1.0];
 
   var gridColor = '#f0f0f0';
   var tickColor = '#9ca3af';
@@ -304,23 +304,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Retention heatmap
   var users = [
-    { name: 'Jim Oates', company: 'Reichard', data: [3,3,1,1,0,2,3,0,2,2,2,0], channels: ['web','web2','mcp'] },
-    { name: 'Marc', company: 'Prizma', data: [1,0,1,0,1,1,4,2,2,0,0,0], channels: ['web','mcp'] },
-    { name: 'Daniel', company: 'InvestnJoy', data: [1,0,1,2,2,1,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'Teddy', company: 'HH Redstone', data: [0,0,0,0,1,0,1,0,1,0,0,2], channels: ['web','mcp'] },
-    { name: 'Kate', company: 'HPI', data: [0,1,0,1,0,0,0,0,2,0,0,0], channels: ['web','mcp'] },
-    { name: 'N. Brown', company: 'AL Apts', data: [0,1,0,0,0,0,1,0,1,0,0,1], channels: ['web','web2','mcp'] },
-    { name: 'Uriya', company: 'ERE', data: [0,0,3,1,0,0,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'R. Welch', company: 'Kaplan', data: [1,0,0,2,0,0,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'Jack', company: 'Mentis CP', data: [0,0,0,0,2,1,0,0,0,0,0,0], channels: ['web','mcp'] },
-    { name: 'Michael', company: 'HPI', data: [0,1,0,0,1,0,0,0,0,0,0,0], channels: ['web','mcp'] },
-    { name: 'Rose', company: 'Reichard', data: [0,1,1,0,0,0,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'Amit', company: 'ERE', data: [0,0,2,0,0,0,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'T. Lubeck', company: 'AL Apts', data: [0,0,1,1,0,0,0,0,0,0,0,0], channels: ['web'] },
-    { name: 'M. Crane', company: 'Sage Vent.', data: [0,0,0,0,1,0,0,0,0,0,0,1], channels: ['web','mcp'] },
-    { name: 'Motty', company: 'Deergrow', data: [0,0,0,0,0,0,0,0,2,0,0,0], channels: ['web','mcp'] },
-    { name: 'J. Lauder', company: 'Reichard', data: [0,0,0,0,0,0,1,0,0,0,0,0], channels: ['web'] },
-    { name: 'Mike', company: '', data: [0,0,0,0,0,0,0,0,0,0,0,1], channels: ['web2'] }
+    { name: 'Jim Oates', company: 'Reichard', data: [3,3,1,1,0,2,3,0,2,2,2,0,0], channels: ['web','web2','mcp'] },
+    { name: 'Marc', company: 'Prizma', data: [1,0,1,0,1,1,4,2,2,0,0,0,1], channels: ['web','mcp'] },
+    { name: 'Daniel', company: 'InvestnJoy', data: [1,0,1,2,2,1,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Teddy', company: 'HH Redstone', data: [0,0,0,0,1,0,1,0,1,0,0,2,1], channels: ['web','mcp'] },
+    { name: 'Kate', company: 'HPI', data: [0,1,0,1,0,0,0,0,2,0,0,0,0], channels: ['web','mcp'] },
+    { name: 'N. Brown', company: 'AL Apts', data: [0,1,0,0,0,0,1,0,1,0,0,1,0], channels: ['web','web2','mcp'] },
+    { name: 'Uriya', company: 'ERE', data: [0,0,3,1,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'R. Welch', company: 'Kaplan', data: [1,0,0,2,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Jack', company: 'Mentis CP', data: [0,0,0,0,2,1,0,0,0,0,0,0,0], channels: ['web','mcp'] },
+    { name: 'Michael', company: 'HPI', data: [0,1,0,0,1,0,0,0,0,0,0,0,0], channels: ['web','mcp'] },
+    { name: 'Rose', company: 'Reichard', data: [0,1,1,0,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Amit', company: 'ERE', data: [0,0,2,0,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'T. Lubeck', company: 'AL Apts', data: [0,0,1,1,0,0,0,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'M. Crane', company: 'Sage Vent.', data: [0,0,0,0,1,0,0,0,0,0,0,1,0], channels: ['web','mcp'] },
+    { name: 'Motty', company: 'Deergrow', data: [0,0,0,0,0,0,0,0,2,0,0,0,0], channels: ['web','mcp'] },
+    { name: 'J. Lauder', company: 'Reichard', data: [0,0,0,0,0,0,1,0,0,0,0,0,0], channels: ['web'] },
+    { name: 'Mike', company: '', data: [0,0,0,0,0,0,0,0,0,0,0,1,0], channels: ['web2'] },
+    { name: 'Dov', company: 'Loboda', data: [0,0,0,0,0,0,0,0,0,0,0,0,1], channels: ['web2'] }
   ];
 
   function heatClass(v) {
@@ -364,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Chart 4: Top users horizontal bar
   var topNames = ['Jim Oates (Reichard)', 'Marc (Prizma)', 'Daniel (InvestnJoy)', 'Teddy (HH Redstone)', 'Kate (HPI)', 'N. Brown (AL Apts)', 'Uriya (ERE)'];
-  var topTotals = [19, 12, 7, 5, 4, 4, 4];
+  var topTotals = [19, 13, 7, 6, 4, 4, 4];
   var topColors = ['#3b82f6', '#3b82f6', '#3b82f6', '#60a5fa', '#60a5fa', '#60a5fa', '#60a5fa'];
 
   new Chart(document.getElementById('chartTopUsers').getContext('2d'), {
@@ -398,21 +399,21 @@ document.addEventListener('DOMContentLoaded', function() {
       datasets: [
         {
           label: 'Web App',
-          data: [3, 3, 1, 1, 0, 2, 1, 0, 0, 0, 0, 0],
+          data: [3, 3, 1, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0],
           backgroundColor: 'rgba(156,163,175,0.5)',
           borderRadius: 4,
           barPercentage: 0.7
         },
         {
           label: 'Web 2.0 (AI)',
-          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+          data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
           backgroundColor: 'rgba(16,185,129,0.5)',
           borderRadius: 4,
           barPercentage: 0.7
         },
         {
           label: 'MCP',
-          data: [0, 0, 0, 0, 0, 0, 3, 0, 2, 2, 2, 0],
+          data: [0, 0, 0, 0, 0, 0, 3, 0, 2, 2, 2, 0, 0],
           backgroundColor: 'rgba(59,130,246,0.5)',
           borderRadius: 4,
           barPercentage: 0.7
