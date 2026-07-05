@@ -195,10 +195,16 @@
 </div>
 
 <div class="section">
-  <div class="section-title">4 — Top Users by Volume</div>
-  <div class="chart-box full">
-    <div class="chart-title">Total active days across all platforms</div>
-    <div class="chart-container tall"><canvas id="chartTopUsers"></canvas></div>
+  <div class="section-title">4 — Leaderboard</div>
+  <div class="chart-row">
+    <div class="chart-box" style="flex:1.2;">
+      <div class="chart-title">Cumulative leaders (all-time active days)</div>
+      <div class="chart-container tall"><canvas id="chartTopUsers"></canvas></div>
+    </div>
+    <div class="chart-box" style="flex:0.8;">
+      <div class="chart-title">Weekly leaders</div>
+      <table class="heatmap-table" id="weeklyLeaders"></table>
+    </div>
   </div>
 </div>
 
@@ -363,18 +369,24 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   table.innerHTML = html;
 
-  // Chart 4: Top users horizontal bar
-  var topNames = ['Jim Oates (Reichard)', 'Marc (Prizma)', 'Daniel (InvestnJoy)', 'Teddy (HH Redstone)', 'Kate (HPI)', 'N. Brown (AL Apts)', 'Uriya (ERE)'];
-  var topTotals = [19, 13, 7, 6, 4, 4, 4];
-  var topColors = ['#3b82f6', '#3b82f6', '#3b82f6', '#60a5fa', '#60a5fa', '#60a5fa', '#60a5fa'];
+  // Chart 4: Cumulative leaderboard (computed from heatmap data)
+  var ranked = users.map(function(u) {
+    var total = u.data.reduce(function(a,b) { return a+b; }, 0);
+    return { name: u.name + (u.company ? ' (' + u.company + ')' : ''), total: total };
+  }).filter(function(u) { return u.total > 0; })
+    .sort(function(a,b) { return b.total - a.total; });
+
+  var leaderNames = ranked.map(function(r) { return r.name; });
+  var leaderTotals = ranked.map(function(r) { return r.total; });
+  var leaderColors = ranked.map(function(r, i) { return i < 3 ? '#3b82f6' : '#60a5fa'; });
 
   new Chart(document.getElementById('chartTopUsers').getContext('2d'), {
     type: 'bar',
     data: {
-      labels: topNames,
+      labels: leaderNames,
       datasets: [{
-        data: topTotals,
-        backgroundColor: topColors,
+        data: leaderTotals,
+        backgroundColor: leaderColors,
         borderRadius: 6,
         barPercentage: 0.5
       }]
@@ -386,10 +398,27 @@ document.addEventListener('DOMContentLoaded', function() {
       plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { color: tickColor }, grid: { color: gridColor }, beginAtZero: true },
-        y: { ticks: { color: '#374151', font: { size: 13 } }, grid: { display: false } }
+        y: { ticks: { color: '#374151', font: { size: 12 } }, grid: { display: false } }
       }
     }
   });
+
+  // Weekly leaders table
+  var wlHtml = '<tr><th>Week</th><th>Leader</th><th style="text-align:right">Days</th></tr>';
+  for (var wi = 0; wi < weeks.length; wi++) {
+    var bestName = '-'; var bestVal = 0;
+    for (var ui = 0; ui < users.length; ui++) {
+      if (users[ui].data[wi] > bestVal) {
+        bestVal = users[ui].data[wi];
+        bestName = users[ui].name;
+      } else if (users[ui].data[wi] === bestVal && bestVal > 0) {
+        bestName += ', ' + users[ui].name;
+      }
+    }
+    var rowStyle = bestVal === 0 ? ' style="color:#d1d5db"' : '';
+    wlHtml += '<tr' + rowStyle + '><td>' + weeks[wi] + '</td><td class="user-name">' + (bestVal > 0 ? bestName : '-') + '</td><td style="text-align:right;font-weight:600">' + (bestVal > 0 ? bestVal : '-') + '</td></tr>';
+  }
+  document.getElementById('weeklyLeaders').innerHTML = wlHtml;
 
   // Chart 5: Jim Oates spotlight
   new Chart(document.getElementById('chartJim').getContext('2d'), {
