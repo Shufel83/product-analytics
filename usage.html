@@ -211,7 +211,10 @@ var medals = ['🥇','🥈','🥉'];
 function userName(email) { var parts = email.split('@')[0].split('.'); return parts.map(function(p){return p.charAt(0).toUpperCase()+p.slice(1)}).join(' '); }
 function topUserSparkline(rw) {
   var mx=Math.max.apply(null,rw)||1;
-  return '<svg width="72" height="20" style="vertical-align:middle;margin-top:6px">'+rw.map(function(v,i){var h=Math.max(Math.round(v/mx*18),v>0?2:0);return '<rect x="'+(i*12)+'" y="'+(20-h)+'" width="10" height="'+h+'" rx="1" fill="'+(i===rw.length-1?'var(--accent)':'#cbd5e1')+'" />'}).join('')+'</svg>';
+  var pts=rw.map(function(v,i){return (i*14)+','+Math.round(20-v/mx*18)});
+  var last=rw.length-1;
+  var lx=last*14,ly=Math.round(20-rw[last]/mx*18);
+  return '<svg width="'+(last*14+4)+'" height="24" style="vertical-align:middle;margin-top:6px"><polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /><circle cx="'+lx+'" cy="'+ly+'" r="3" fill="var(--accent)" /></svg>';
 }
 document.getElementById('topUsers').innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">'+topExtUsers.map(function(u,idx){
   var u3w = userTrend(u,3);
