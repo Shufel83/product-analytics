@@ -49,16 +49,18 @@ tr:hover td{background:var(--surface2)}
 #map{height:400px;border-radius:10px;margin-bottom:8px}
 .map-legend{display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:11px;color:var(--text2);padding:0 4px}
 .map-legend .swatch{width:16px;height:12px;border-radius:2px;display:inline-block}
-.msa-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:12px}
-.msa-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
-.msa-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
-.msa-header .name{font-size:14px;font-weight:600;color:var(--text)}
-.msa-header .count{font-size:14px;color:var(--accent);font-weight:700}
-.msa-zips{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-.msa-card.open .msa-zips{display:block}
-.msa-header .arrow{font-size:10px;color:var(--text2);margin-right:6px;transition:transform .2s}
-.msa-card.open .msa-header .arrow{transform:rotate(90deg)}
-.zip-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-family:monospace;color:var(--text2)}
+.geo-table{width:100%;border-collapse:collapse;font-size:13px}
+.geo-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--text2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;position:sticky;top:0}
+.geo-table td{padding:6px 10px;border-bottom:1px solid var(--border)}
+.geo-table .msa-row{cursor:pointer;user-select:none;background:var(--surface)}
+.geo-table .msa-row:hover{background:var(--surface2)}
+.geo-table .msa-row td{font-weight:600}
+.geo-table .msa-row .arrow{font-size:10px;color:var(--text2);margin-right:6px;transition:transform .2s;display:inline-block}
+.geo-table .msa-row.open .arrow{transform:rotate(90deg)}
+.geo-table .zip-row{display:none}
+.geo-table .zip-row td{font-size:12px;color:var(--text2);padding:4px 10px 4px 28px}
+.geo-table .zip-row td:first-child{padding-left:28px}
+.geo-table td.num,.geo-table th.num{text-align:right}
 .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .filter-btn{padding:6px 14px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .2s}
 .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -108,7 +110,7 @@ tr:hover td{background:var(--surface2)}
 <div class="panel" id="panel-geography">
   <div id="map"></div>
   <div class="map-legend"><span>Queries:</span><span class="swatch" style="background:#DDD6FE"></span>1-10<span class="swatch" style="background:#A78BFA"></span>11-50<span class="swatch" style="background:#7C3AED"></span>51-100<span class="swatch" style="background:#581c87"></span>100+</div>
-  <div id="msaList"></div>
+  <div class="table-wrap"><table class="geo-table" id="geoTable"><thead id="geoHead"></thead><tbody id="geoBody"></tbody></table></div>
 </div>
 <div class="panel" id="panel-friction">
   <div class="filter-bar" id="ff"><div class="filter-btn active" data-filter="all">All</div><div class="filter-btn" data-filter="external">External Only</div></div>
@@ -314,15 +316,32 @@ function initMap(){
     var m=msas[i];
     var r=Math.min(Math.max(Math.sqrt(m.count/maxQ)*30,6),35);
     var col=m.count>100?'#581c87':m.count>50?'#7C3AED':m.count>10?'#A78BFA':'#DDD6FE';
-    var zList=m.zips.map(function(z){return z[0]+' ('+z[1]+')'}).join('<br>');
+    var zList=m.zips.map(function(z){return z[0]+(z[2]?' '+z[2]:'')+' ('+z[1]+')'}).join('<br>');
     L.circleMarker([m.lat,m.lng],{radius:r,color:col,fillColor:col,fillOpacity:.6,weight:2}).addTo(map)
       .bindPopup('<b>'+m.name+'</b><br>'+m.count+' queries<br><small>'+m.zips.length+' ZIPs</small><hr style="margin:4px 0"><small>'+zList+'</small>');
   }
-  var el=document.getElementById('msaList');
-  el.innerHTML='<div class="msa-list">'+msas.map(function(m){
-    return '<div class="msa-card"><div class="msa-header"><div><span class="arrow">▶</span><span class="name">'+m.name+'</span></div><span class="count">'+m.count+'</span></div><div class="msa-zips">'+m.zips.map(function(z){return '<div class="zip-row"><span>'+z[0]+'</span><span>'+z[1]+'</span></div>'}).join('')+'</div></div>'
-  }).join('')+'</div>';
-  el.querySelectorAll('.msa-header').forEach(function(h){h.addEventListener('click',function(){h.parentElement.classList.toggle('open')})});
+  var wks=D.geo.weeks||[];
+  var wkHd=wks.map(function(w){return '<th class="num">'+w.slice(5)+'</th>'}).join('');
+  document.getElementById('geoHead').innerHTML='<tr><th>Market</th><th class="num">Total</th>'+wkHd+'</tr>';
+  var rows='';
+  msas.forEach(function(m,mi){
+    var mwk=(m.weekly||[]).map(function(v){return '<td class="num">'+v+'</td>'}).join('');
+    rows+='<tr class="msa-row" data-msa="'+mi+'"><td><span class="arrow">▶</span>'+m.name+'</td><td class="num" style="color:var(--accent);font-weight:700">'+m.count+'</td>'+mwk+'</tr>';
+    m.zips.forEach(function(z){
+      var city=z[2]||'';
+      var zwk=(z[3]||[]).map(function(v){return '<td class="num">'+(v||'')+'</td>'}).join('');
+      rows+='<tr class="zip-row" data-msa="'+mi+'"><td>'+z[0]+(city?' <span style="color:var(--text2);font-size:11px">'+city+'</span>':'')+'</td><td class="num">'+z[1]+'</td>'+zwk+'</tr>';
+    });
+  });
+  document.getElementById('geoBody').innerHTML=rows;
+  document.querySelectorAll('.geo-table .msa-row').forEach(function(r){
+    r.addEventListener('click',function(){
+      var open=r.classList.toggle('open');
+      var mi=r.dataset.msa;
+      var zrs=document.querySelectorAll('.geo-table .zip-row[data-msa="'+mi+'"]');
+      zrs.forEach(function(zr){zr.style.display=open?'table-row':'none'});
+    });
+  });
 }
 
 // FRICTION
