@@ -98,11 +98,12 @@ tr:hover td{background:var(--surface2)}
   <div class="chart-container"><h3>Daily Activity (30 days)</h3><canvas id="dailyChart"></canvas></div>
 </div>
 <div class="panel" id="panel-users">
-  <div class="table-wrap"><table id="ut2"><thead><tr><th>User</th><th>Last Active</th><th>This Week</th><th>Total</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
+  <div class="filter-bar" id="uf"><div class="filter-btn active" data-filter="active">Active</div><div class="filter-btn" data-filter="dormant">Dormant</div><div class="filter-btn" data-filter="offboarded">Offboarded</div><div class="filter-btn" data-filter="all">All</div></div>
+  <div class="table-wrap"><table id="ut2"><thead><tr><th>Status</th><th>User</th><th>Last Active</th><th>This Week</th><th>Total</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
 </div>
 <div class="panel" id="panel-accounts">
-  <div class="filter-bar" id="af"><div class="filter-btn" data-filter="all">All</div><div class="filter-btn active" data-filter="external">External</div><div class="filter-btn" data-filter="internal">Internal</div></div>
-  <div class="table-wrap"><table id="at2"><thead><tr><th>Account</th><th>Users</th><th>Last Active</th><th>This Week</th><th>Total</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
+  <div class="filter-bar" id="af"><div class="filter-btn active" data-filter="active">Active</div><div class="filter-btn" data-filter="all">All</div><div class="filter-btn" data-filter="offboarded">Offboarded</div></div>
+  <div class="table-wrap"><table id="at2"><thead><tr><th>Status</th><th>Account</th><th>Users</th><th>Last Active</th><th>This Week</th><th>Total</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
 </div>
 <div class="panel" id="panel-geography">
   <div id="map"></div>
@@ -110,7 +111,7 @@ tr:hover td{background:var(--surface2)}
   <div id="msaList"></div>
 </div>
 <div class="panel" id="panel-friction">
-  <div class="filter-bar" id="ff"><div class="filter-btn" data-filter="all">All</div><div class="filter-btn active" data-filter="external">External</div><div class="filter-btn" data-filter="internal">Internal</div></div>
+  <div class="filter-bar" id="ff"><div class="filter-btn active" data-filter="all">All</div><div class="filter-btn" data-filter="external">External Only</div></div>
   <div class="grid" id="fc"></div>
   <div class="chart-container"><h3>Error Trend (30 days)</h3><canvas id="etChart"></canvas></div>
   <div class="table-wrap"><h3>MCP Errors</h3><table id="et"><thead><tr><th>Time</th><th>User</th><th>Tool</th><th>Error</th></tr></thead><tbody></tbody></table></div>
@@ -261,19 +262,28 @@ new Chart(document.getElementById('dailyChart').getContext('2d'),{type:'bar',dat
 function wowBadge(v){if(v===null)return'<span class="delta flat">—</span>';if(v==='new')return'<span class="delta up">new</span>';if(v>0)return'<span class="delta up">\u2191'+v+'%</span>';if(v<0)return'<span class="delta down">\u2193'+Math.abs(v)+'%</span>';return'<span class="delta flat">\u2192 0%</span>'}
 function streakBadge(n){if(!n)return'—';return n+'w'}
 function sparkline(arr){var mx=Math.max.apply(null,arr)||1;return '<svg width="60" height="20" style="vertical-align:middle">'+arr.map(function(v,i){var h=Math.max(Math.round(v/mx*18),v>0?2:0);return '<rect x="'+(i*10+1)+'" y="'+(20-h)+'" width="8" height="'+h+'" rx="1" fill="'+(i===arr.length-1?'var(--accent)':'#cbd5e1')+'" />'}).join('')+'</svg>'}
-var extUsers=D.users.filter(function(u){return!u.internal});
-document.querySelector('#ut2 tbody').innerHTML=extUsers.map(function(u){var laTs=u.lastActive?new Date(u.lastActive).getTime():0;return '<tr><td>'+u.email+' <span class="badge external">'+u.company+'</span></td><td data-sort-value="'+laTs+'">'+fd(u.lastActive)+'</td><td><strong>'+u.thisWeek+'</strong></td><td>'+u.totalActivity.toLocaleString()+'</td><td>'+wowBadge(u.wow)+'</td><td>'+streakBadge(u.streak)+'</td><td>'+sparkline(u.recentWeeks)+'</td><td>'+u.mcpClaude.toLocaleString()+'</td><td>'+u.mcpGpt.toLocaleString()+'</td><td>'+u.web.toLocaleString()+'</td></tr>'}).join('');
-sortTbl(document.getElementById('ut2'));
+function userStatus(u){if(isOffboarded(u.email))return 'offboarded';var rw=u.recentWeeks||[];if(rw.length&&rw[rw.length-1]>0)return 'active';return 'dormant'}
+function statusDot(s){var c=s==='active'?'var(--green)':s==='offboarded'?'var(--red)':'#9ca3af';return '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+c+';margin-right:6px" title="'+s+'"></span>'+s}
+function rU(f){
+  var all=D.users.filter(function(u){return!u.internal});
+  var fl=f==='all'?all:all.filter(function(u){return userStatus(u)===f});
+  document.querySelector('#ut2 tbody').innerHTML=fl.map(function(u){var st=userStatus(u);var laTs=u.lastActive?new Date(u.lastActive).getTime():0;var rowStyle=st==='offboarded'?' style="text-decoration:line-through;color:var(--text2)"':'';return '<tr'+rowStyle+'><td>'+statusDot(st)+'</td><td>'+u.email+' <span class="badge external">'+u.company+'</span></td><td data-sort-value="'+laTs+'">'+fd(u.lastActive)+'</td><td><strong>'+u.thisWeek+'</strong></td><td>'+u.totalActivity.toLocaleString()+'</td><td>'+wowBadge(u.wow)+'</td><td>'+streakBadge(u.streak)+'</td><td>'+sparkline(u.recentWeeks)+'</td><td>'+u.mcpClaude.toLocaleString()+'</td><td>'+u.mcpGpt.toLocaleString()+'</td><td>'+u.web.toLocaleString()+'</td></tr>'}).join('');
+  sortTbl(document.getElementById('ut2'));
+}
+rU('active');
+document.querySelectorAll('#uf .filter-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('#uf .filter-btn').forEach(function(x){x.classList.remove('active')});b.classList.add('active');rU(b.dataset.filter)})});
 
 // ACCOUNTS
+function accStatus(a){var dom=(a.domain||'').toLowerCase();if(offboardedDomains.indexOf(dom)!==-1)return 'offboarded';var rw=a.weeklyHistory||[];if(rw.length&&rw[rw.length-1]>0)return 'active';return 'dormant'}
 function rA(f){
   var tb=document.querySelector('#at2 tbody');
-  var fl=f==='all'?D.accounts:D.accounts.filter(function(a){return f==='external'?!a.internal:a.internal});
-  tb.innerHTML=fl.map(function(a){var laTs=a.lastActive?new Date(a.lastActive).getTime():0;return '<tr><td><span class="badge '+(a.internal?'internal':'external')+'">'+a.company+'</span></td><td>'+a.users+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+wowBadge(a.wow)+'</td><td>'+streakBadge(a.streak)+'</td><td>'+sparkline(a.weeklyHistory)+'</td><td>'+a.mcpClaude.toLocaleString()+'</td><td>'+a.mcpGpt.toLocaleString()+'</td><td>'+a.web.toLocaleString()+'</td></tr>'}).join('');
+  var ext=D.accounts.filter(function(a){return!a.internal});
+  var fl=f==='all'?ext.filter(function(a){return accStatus(a)!=='offboarded'}):f==='offboarded'?ext.filter(function(a){return accStatus(a)==='offboarded'}):ext.filter(function(a){return accStatus(a)===f});
+  tb.innerHTML=fl.map(function(a){var st=accStatus(a);var laTs=a.lastActive?new Date(a.lastActive).getTime():0;var rowStyle=st==='offboarded'?' style="text-decoration:line-through;color:var(--text2)"':'';return '<tr'+rowStyle+'><td>'+statusDot(st)+'</td><td><span class="badge external">'+a.company+'</span></td><td>'+a.users+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+wowBadge(a.wow)+'</td><td>'+streakBadge(a.streak)+'</td><td>'+sparkline(a.weeklyHistory)+'</td><td>'+a.mcpClaude.toLocaleString()+'</td><td>'+a.mcpGpt.toLocaleString()+'</td><td>'+a.web.toLocaleString()+'</td></tr>'}).join('');
+  sortTbl(document.getElementById('at2'));
 }
-rA('external');
+rA('active');
 document.querySelectorAll('#af .filter-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('#af .filter-btn').forEach(function(x){x.classList.remove('active')});b.classList.add('active');rA(b.dataset.filter)})});
-sortTbl(document.getElementById('at2'));
 
 
 // GEOGRAPHY
