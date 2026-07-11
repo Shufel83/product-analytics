@@ -205,7 +205,8 @@ document.getElementById('sc').innerHTML='<div class="card north-star"><div class
   '<div class="card"><div class="label">Accounts &amp; Users</div><div class="value" style="font-size:22px">'+S.extAccountCount+' <span style="font-size:14px;color:var(--text2)">accounts</span></div><div style="font-size:22px;font-weight:700">'+S.extUserCount+' <span style="font-size:14px;color:var(--text2);font-weight:400">users</span></div></div>';
 
 // Top 3 external users
-var topExtUsers = D.users.filter(function(u){return !u.internal}).sort(function(a,b){return b.totalActivity - a.totalActivity}).slice(0,3);
+function last7(u){var rw=u.recentWeeks||[];return rw.length?rw[rw.length-1]:0}
+var topExtUsers = D.users.filter(function(u){return !u.internal&&last7(u)>0}).sort(function(a,b){return last7(b) - last7(a)}).slice(0,3);
 var medals = ['🥇','🥈','🥉'];
 function userName(email) { var parts = email.split('@')[0].split('.'); return parts.map(function(p){return p.charAt(0).toUpperCase()+p.slice(1)}).join(' '); }
 function topUserSparkline(rw) {
@@ -224,7 +225,7 @@ document.getElementById('topUsers').innerHTML='<div style="display:grid;grid-tem
   }
   var wowVal = u.wow;
   var wowStr = wowVal==='new'?'<span class="delta up">new</span>':(wowVal!==null&&wowVal!==undefined?'<span class="delta '+(wowVal>0?'up':wowVal<0?'down':'flat')+'">'+(wowVal>0?'↑':wowVal<0?'↓':'→')+' '+Math.abs(wowVal)+'%</span>':'<span class="delta flat">—</span>');
-  return '<div class="card" style="text-align:center;padding:20px 16px"><div style="font-size:28px;margin-bottom:4px">'+medals[idx]+'</div><div style="font-size:15px;font-weight:600">'+userName(u.email)+'</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+u.company+'</div><div style="font-size:24px;font-weight:700">'+u.totalActivity.toLocaleString()+'</div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">all-time queries</div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+wowStr+trendBadge(u3w,'3w')+trendBadge(u6w,'6w')+'</div><div>'+topUserSparkline(u.recentWeeks||[])+'</div></div>';
+  return '<div class="card" style="text-align:center;padding:20px 16px"><div style="font-size:28px;margin-bottom:4px">'+medals[idx]+'</div><div style="font-size:15px;font-weight:600">'+userName(u.email)+'</div><div style="font-size:12px;color:var(--text2);margin-bottom:8px">'+u.company+'</div><div style="font-size:24px;font-weight:700">'+last7(u).toLocaleString()+'</div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">last 7 days</div><div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+wowStr+trendBadge(u3w,'3w')+trendBadge(u6w,'6w')+'</div><div>'+topUserSparkline(u.recentWeeks||[])+'</div></div>';
 }).join('')+'</div>';
 
 // Weekly trend chart with cumulative line
