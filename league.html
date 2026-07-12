@@ -609,16 +609,7 @@
       <div class="card-title">Activity</div>
       <table class="heatmap">
         <thead>
-          <tr>
-            <th></th>
-            <th>Sun</th>
-            <th>Mon</th>
-            <th>Tue</th>
-            <th>Wed</th>
-            <th>Thu</th>
-            <th>Fri</th>
-            <th>Sat</th>
-          </tr>
+          <tr id="heatmap-head"></tr>
         </thead>
         <tbody id="heatmap-body"></tbody>
       </table>
@@ -694,6 +685,10 @@
       <div id="champions-list"></div>
     </div>
   </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Weekly Trend</div>
+    <div id="trend-chart"></div>
+  </div>
 </div>
 </div><!-- /season-view -->
 
@@ -719,69 +714,35 @@ const AVATARS = {
   'Shuf': "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2310b981'/%3E%3Ccircle cx='50' cy='22' r='4' fill='white'/%3E%3Crect x='48.5' y='24' width='3' height='9' fill='white'/%3E%3Crect x='28' y='33' width='44' height='36' rx='10' fill='white'/%3E%3Ccircle cx='41' cy='50' r='6' fill='%2310b981'/%3E%3Ccircle cx='59' cy='50' r='6' fill='%2310b981'/%3E%3Ccircle cx='41' cy='50' r='2.4' fill='white'/%3E%3Ccircle cx='59' cy='50' r='2.4' fill='white'/%3E%3Crect x='40' y='60' width='20' height='4' rx='2' fill='%2310b981'/%3E%3Crect x='24' y='44' width='4' height='12' rx='2' fill='white'/%3E%3Crect x='72' y='44' width='4' height='12' rx='2' fill='white'/%3E%3C/svg%3E",
 };
 
-const LEAGUE_WEEKS = [
-  {
-    week: 1,
-    label: 'Jun 30 - Jul 6',
-    benchmark: { score: 22.5, sessions: 11, days: 5 },
-    players: [
-      { name: 'Omer', score: 10.5, sessions: 4, bugs: 1, webSessions: 2, mcpSessions: 2, mult: 1.5 },
-      { name: 'Oleg', score: 6.0, sessions: 6, bugs: 0, webSessions: 6, mcpSessions: 0, mult: 1 },
-      { name: 'Eden', score: 3.0, sessions: 3, bugs: 0, webSessions: 3, mcpSessions: 0, mult: 1 },
-      { name: 'Dor', score: 2.0, sessions: 2, bugs: 0, webSessions: 2, mcpSessions: 0, mult: 1 },
-      { name: 'Elena', score: 1.5, sessions: 1, bugs: 0, webSessions: 1, mcpSessions: 0, mult: 1.5 },
-      { name: 'Ohad', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Sveto', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Meitar', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Danielle', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Amir', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Max', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Mike', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Shuf', score: 11, sessions: 11, bugs: 0, webSessions: 6, mcpSessions: 5, mult: 1, reference: true },
-    ],
-    daily: {
-      'Omer': {'2026-07-01':1,'2026-07-02':1,'2026-07-04':2},
-      'Oleg': {'2026-07-01':1,'2026-07-02':3,'2026-07-04':2},
-      'Eden': {'2026-07-01':1,'2026-07-02':2},
-      'Dor': {'2026-07-02':2},
-      'Elena': {'2026-06-30':1},
-      'Shuf': {'2026-06-30':1,'2026-07-01':1,'2026-07-02':1,'2026-07-03':1,'2026-07-04':1,'2026-07-05':1}
-    }
-  },
-  {
-    week: 2,
-    label: 'Jul 6 - Jul 12',
-    benchmark: { score: 25.5, sessions: 17, days: 5 },
-    players: [
-      { name: 'Ohad', score: 40.1, sessions: 11, bugs: 3, webSessions: 7, mcpSessions: 4, mult: 1.38 },
-      { name: 'Danielle', score: 25, sessions: 5, bugs: 4, webSessions: 5, mcpSessions: 0, mult: 1 },
-      { name: 'Amir', score: 20, sessions: 0, bugs: 4, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Eden', score: 10, sessions: 10, bugs: 0, webSessions: 10, mcpSessions: 0, mult: 1 },
-      { name: 'Max', score: 10, sessions: 10, bugs: 0, webSessions: 10, mcpSessions: 0, mult: 1 },
-      { name: 'Omer', score: 10, sessions: 8, bugs: 0, webSessions: 4, mcpSessions: 4, mult: 1.25 },
-      { name: 'Oleg', score: 10, sessions: 10, bugs: 0, webSessions: 10, mcpSessions: 0, mult: 1 },
-      { name: 'Meitar', score: 9, sessions: 9, bugs: 0, webSessions: 9, mcpSessions: 0, mult: 1 },
-      { name: 'Dor', score: 7, sessions: 7, bugs: 0, webSessions: 7, mcpSessions: 0, mult: 1 },
-      { name: 'Elena', score: 5, sessions: 4, bugs: 0, webSessions: 2, mcpSessions: 2, mult: 1.25 },
-      { name: 'Sveto', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Mike', score: 0, sessions: 0, bugs: 0, webSessions: 0, mcpSessions: 0, mult: 1 },
-      { name: 'Shuf', score: 19, sessions: 19, bugs: 0, webSessions: 7, mcpSessions: 12, mult: 1, reference: true },
-    ],
-    daily: {
-      'Ohad': {'2026-07-07':1,'2026-07-08':1,'2026-07-09':1,'2026-07-12':1},
-      'Danielle': {'2026-07-07':1,'2026-07-09':1,'2026-07-11':1},
-      'Omer': {'2026-07-06':1,'2026-07-07':1,'2026-07-08':1,'2026-07-11':1},
-      'Oleg': {'2026-07-07':1,'2026-07-08':1,'2026-07-09':1},
-      'Eden': {'2026-07-06':1,'2026-07-07':1,'2026-07-08':1,'2026-07-09':1,'2026-07-12':1},
-      'Max': {'2026-07-06':1,'2026-07-07':1,'2026-07-08':1,'2026-07-09':1,'2026-07-11':1,'2026-07-12':1},
-      'Meitar': {'2026-07-08':1,'2026-07-09':1,'2026-07-10':1,'2026-07-12':1},
-      'Elena': {'2026-07-06':1,'2026-07-07':1},
-      'Dor': {'2026-07-06':1,'2026-07-09':1,'2026-07-12':1},
-      'Tal': {'2026-07-06':1,'2026-07-07':1,'2026-07-09':1,'2026-07-11':1,'2026-07-12':1},
-      'Shuf': {'2026-07-06':1,'2026-07-07':1,'2026-07-08':1,'2026-07-09':1,'2026-07-10':1,'2026-07-11':1,'2026-07-12':1}
-    }
+// DATA lives in league_data.json (single source of truth). This file is pure PRESENTATION.
+let LEAGUE_WEEKS = [];
+let CONFIG = { weekStartsOn: 'monday' };
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Parse an ISO date (YYYY-MM-DD) as a local calendar date, no timezone drift.
+function parseISO(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function isoOf(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+// Seven ISO dates for a week, derived from its canonical start.
+function weekDays(week) {
+  const start = parseISO(week.start);
+  const out = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    out.push(isoOf(d));
   }
-];
+  return out;
+}
+function weekLabel(week) {
+  const s = parseISO(week.start), e = parseISO(week.end);
+  return `${MONTH_NAMES[s.getMonth()]} ${s.getDate()} - ${MONTH_NAMES[e.getMonth()]} ${e.getDate()}, ${e.getFullYear()}`;
+}
 
 function computeSeason() {
   const totals = {};
@@ -898,7 +859,11 @@ function renderWeekly() {
   const sorted = [...competitors].sort((a, b) => b.score - a.score);
   const bm = week.benchmark;
 
-  document.getElementById('week-label').textContent = week.label + ', 2026';
+  document.getElementById('week-label').textContent = weekLabel(week);
+
+  const days = weekDays(week);
+  document.getElementById('heatmap-head').innerHTML =
+    '<th></th>' + days.map(d => `<th>${DAY_NAMES[parseISO(d).getDay()]}</th>`).join('');
 
   document.getElementById('benchmark-stats').innerHTML = `
     <div class="benchmark-stat"><div class="benchmark-stat-value">${bm.score}</div><div class="benchmark-stat-label">Score</div></div>
@@ -977,11 +942,6 @@ function renderWeekly() {
   document.getElementById('weekly-body').innerHTML = competitorRows + refRows;
 
   const daily = week.daily || {};
-  const startDate = new Date(week.label.split(' - ')[0] + ', 2026');
-  const days = [];
-  for (let d = new Date(startDate); days.length < 7; d.setDate(d.getDate() + 1)) {
-    days.push(d.toISOString().split('T')[0]);
-  }
   const activeNames = sorted.filter(p => p.score > 0).map(p => p.name);
   const inactiveNames = sorted.filter(p => p.score === 0).map(p => p.name);
   document.getElementById('heatmap-body').innerHTML = [...activeNames, ...inactiveNames].map(name => {
@@ -1022,6 +982,53 @@ function renderWeekly() {
     : '<li class="bug-item" style="color:var(--text-muted)">No reports yet this week</li>';
 }
 
+function renderTrend() {
+  const el = document.getElementById('trend-chart');
+  if (LEAGUE_WEEKS.length < 2) {
+    el.innerHTML = '<div style="color:var(--text-muted);padding:8px 0">Trend appears after 2+ weeks.</div>';
+    return;
+  }
+  // Cumulative score per competitor across weeks.
+  const names = new Set();
+  LEAGUE_WEEKS.forEach(w => w.players.filter(p => !p.reference).forEach(p => names.add(p.name)));
+  const series = [...names].map(name => {
+    let cum = 0;
+    const pts = LEAGUE_WEEKS.map(w => {
+      const p = w.players.find(pp => pp.name === name);
+      cum += p ? p.score : 0;
+      return cum;
+    });
+    return { name, pts, total: cum };
+  }).filter(s => s.total > 0).sort((a, b) => b.total - a.total);
+
+  const W = 640, H = 300, padL = 40, padR = 90, padT = 20, padB = 30;
+  const maxY = Math.max(...series.map(s => s.pts[s.pts.length - 1]), 1);
+  const n = LEAGUE_WEEKS.length;
+  const x = i => padL + (W - padL - padR) * (n === 1 ? 0 : i / (n - 1));
+  const y = v => H - padB - (H - padT - padB) * (v / maxY);
+  const colors = ['#10b981','#6366f1','#f59e0b','#ef4444','#ec4899','#14b8a6','#8b5cf6','#eab308','#06b6d4','#f97316','#84cc16','#a855f7'];
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">`;
+  for (let g = 0; g <= 4; g++) {
+    const gy = padT + (H - padT - padB) * g / 4;
+    svg += `<line x1="${padL}" y1="${gy}" x2="${W-padR}" y2="${gy}" stroke="#1f2937" stroke-width="1"/>`;
+    svg += `<text x="${padL-6}" y="${gy+4}" text-anchor="end" fill="#6b7280" font-size="10">${Math.round(maxY*(4-g)/4)}</text>`;
+  }
+  LEAGUE_WEEKS.forEach((w, i) => {
+    svg += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" fill="#9ca3af" font-size="10">W${w.week}</text>`;
+  });
+  series.forEach((s, si) => {
+    const c = colors[si % colors.length];
+    const path = s.pts.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(v)}`).join(' ');
+    svg += `<path d="${path}" fill="none" stroke="${c}" stroke-width="2"/>`;
+    s.pts.forEach((v, i) => { svg += `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${c}"/>`; });
+    const ly = y(s.pts[s.pts.length - 1]);
+    svg += `<text x="${W-padR+6}" y="${ly+4}" fill="${c}" font-size="10">${s.name}</text>`;
+  });
+  svg += `</svg>`;
+  el.innerHTML = svg;
+}
+
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
@@ -1029,8 +1036,23 @@ function switchTab(tab) {
   event.target.classList.add('active');
 }
 
-renderWeekly();
-renderSeason();
+async function init() {
+  try {
+    const res = await fetch('league_data.json?t=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    LEAGUE_WEEKS = data.weeks || [];
+    CONFIG = data.config || CONFIG;
+  } catch (e) {
+    document.getElementById('week-label').textContent = 'Data unavailable';
+    console.error('Failed to load league_data.json', e);
+    return;
+  }
+  renderWeekly();
+  renderSeason();
+  renderTrend();
+}
+init();
 </script>
 </body>
 </html>
