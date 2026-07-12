@@ -787,6 +787,8 @@ function computeSeason() {
   const totals = {};
   const wins = {};
   const bestWeek = {};
+  const refTotals = {};
+  const refBest = {};
 
   LEAGUE_WEEKS.forEach(week => {
     const competitors = week.players.filter(p => !p.reference);
@@ -802,6 +804,13 @@ function computeSeason() {
         bestWeek[p.name] = p.score;
       }
     });
+
+    week.players.filter(p => p.reference).forEach(p => {
+      refTotals[p.name] = (refTotals[p.name] || 0) + p.score;
+      if (!refBest[p.name] || p.score > refBest[p.name]) {
+        refBest[p.name] = p.score;
+      }
+    });
   });
 
   const standings = Object.keys(totals)
@@ -813,15 +822,23 @@ function computeSeason() {
     }))
     .sort((a, b) => b.total - a.total || b.wins - a.wins);
 
-  return standings;
+  const references = Object.keys(refTotals)
+    .map(name => ({
+      name,
+      total: refTotals[name],
+      best: refBest[name] || 0
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  return { standings, references };
 }
 
 function renderSeason() {
-  const standings = computeSeason();
+  const { standings, references } = computeSeason();
   const tbody = document.getElementById('cumulative-body');
   let rank = 0, prevScore = -1;
 
-  tbody.innerHTML = standings.map((p, i) => {
+  const rows = standings.map((p, i) => {
     if (p.total !== prevScore) { rank = i + 1; prevScore = p.total; }
     const rankClass = rank <= 3 ? ` rank-${rank}` : '';
     const scoreClass = p.total === 0 ? ' zero-score' : '';
@@ -842,12 +859,27 @@ function renderSeason() {
     </tr>`;
   }).join('');
 
+  const refRows = references.map(p => `<tr class="reference-row">
+      <td><span class="rank" style="color:var(--green)">-</span></td>
+      <td>
+        <div class="player-cell">
+          <img class="player-avatar" src="${AVATARS[p.name]}" alt="${p.name}" style="border-color:var(--green)">
+          <div><div class="player-name">${p.name} <span style="color:var(--text-muted);font-size:0.72rem">ref</span></div></div>
+        </div>
+      </td>
+      <td class="score-cell">${p.total.toFixed(1)}</td>
+      <td><span class="wins-count no-wins" title="Reference — not competing">-</span></td>
+      <td>${p.best === 0 ? '-' : p.best.toFixed(1)}</td>
+    </tr>`).join('');
+
+  tbody.innerHTML = rows + refRows;
+
   document.getElementById('season-meta').textContent =
     `${LEAGUE_WEEKS.length} week${LEAGUE_WEEKS.length > 1 ? 's' : ''} played`;
 
   const champDiv = document.getElementById('champions-list');
   champDiv.innerHTML = LEAGUE_WEEKS.map(week => {
-    const sorted = [...week.players].sort((a, b) => b.score - a.score);
+    const sorted = week.players.filter(p => !p.reference).sort((a, b) => b.score - a.score);
     const champ = sorted[0];
     if (!champ || champ.score === 0) return '';
     return `<div class="champion-row">
@@ -963,7 +995,10 @@ function renderWeekly() {
 
   const mostSessions = sorted.reduce((a, b) => a.sessions >= b.sessions ? a : b);
   const mostPlatforms = sorted.reduce((a, b) => a.mult >= b.mult ? a : b);
-  const bugHunter = sorted.find(p => p.bugs > 0);
+  const maxBugs = Math.max(0, ...sorted.map(p => p.bugs));
+  const bugHunter = maxBugs > 0
+    ? { name: sorted.filter(p => p.bugs === maxBugs).map(p => p.name).join(', ') }
+    : null;
   const prevWeek = LEAGUE_WEEKS.length > 1 ? LEAGUE_WEEKS[LEAGUE_WEEKS.length - 2] : null;
   let risingStar = null;
   if (prevWeek) {
