@@ -125,7 +125,7 @@ tr:hover td{background:var(--surface2)}
       <button id="geoModeNum" class="filter-btn active" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('#')">#</button>
       <button id="geoModePct" class="filter-btn" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('%')">%</button>
     </div>
-    <select id="geoAcctFilter" onchange="renderGeoTable()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
+    <select id="geoAcctFilter" onchange="renderGeoTable();renderGeoMap()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
       <option value="">All accounts</option>
     </select>
     <span id="geoNote" style="font-size:11px;color:var(--text2)">MCP + Web queries</span>
@@ -310,25 +310,47 @@ sortTbl(document.getElementById('at2'));
 
 
 // GEOGRAPHY
-var mapInit=false,geoMode='#',geoMap=null;
+var mapInit=false,geoMode='#',geoMap=null,geoLayer=null;
 function setGeoMode(m){geoMode=m;document.getElementById('geoModeNum').classList.toggle('active',m==='#');document.getElementById('geoModePct').classList.toggle('active',m==='%');renderGeoTable()}
 function initMap(){
   if(mapInit)return;mapInit=true;
   var map=L.map('map').setView([39.8,-98.5],4);geoMap=map;
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM & Carto',maxZoom:18}).addTo(map);
-  var msas=D.geo.msas;
-  var maxQ=msas.length?msas[0].count:1;
-  for(var i=0;i<msas.length;i++){
-    var m=msas[i];
-    var r=Math.min(Math.max(Math.sqrt(m.count/maxQ)*30,6),35);
-    var col=m.count>100?'#581c87':m.count>50?'#7C3AED':m.count>10?'#A78BFA':'#DDD6FE';
-    var zList=m.zips.map(function(z){return z[0]+(z[2]?' '+z[2]:'')+' ('+z[1]+')'}).join('<br>');
-    L.circleMarker([m.lat,m.lng],{radius:r,color:col,fillColor:col,fillOpacity:.6,weight:2}).addTo(map)
-      .bindPopup('<b>'+m.name+'</b><br>'+m.count+' queries<br><small>'+m.zips.length+' ZIPs</small><hr style="margin:4px 0"><small>'+zList+'</small>');
-  }
+  geoLayer=L.layerGroup().addTo(map);
   var sel=document.getElementById('geoAcctFilter');
   (D.geo.accounts||[]).forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o)});
+  renderGeoMap();
   renderGeoTable();
+}
+function renderGeoMap(){
+  if(!geoMap||!geoLayer)return;
+  geoLayer.clearLayers();
+  var acct=document.getElementById('geoAcctFilter').value;
+  var za=D.geo.zipAcct||{};
+  var mData=(D.geo.msas||[]).map(function(m){
+    var cnt=0,zl=[];
+    m.zips.forEach(function(z){
+      var c=z[1];
+      if(acct){c=(za[z[0]]||{})[acct]||0;if(!c)return;}
+      cnt+=c;zl.push(z[0]+(z[2]?' '+z[2]:'')+' ('+c+')');
+    });
+    return {name:m.name,lat:m.lat,lng:m.lng,count:cnt,zips:zl};
+  }).filter(function(m){return m.count>0});
+  var maxQ=mData.reduce(function(mx,m){return Math.max(mx,m.count)},1);
+  mData.forEach(function(m){
+    var r=Math.min(Math.max(Math.sqrt(m.count/maxQ)*30,6),35);
+    var col=m.count>100?'#581c87':m.count>50?'#7C3AED':m.count>10?'#A78BFA':'#DDD6FE';
+    L.circleMarker([m.lat,m.lng],{radius:r,color:col,fillColor:col,fillOpacity:.6,weight:2}).addTo(geoLayer)
+      .bindPopup('<b>'+m.name+'</b><br>'+m.count+' queries<br><small>'+m.zips.length+' ZIPs</small><hr style="margin:4px 0"><small>'+m.zips.join('<br>')+'</small>');
+  });
+  (D.assetInterest||[]).forEach(function(a){
+    if(!a.lat||!a.lng)return;
+    if(acct&&!a.users.some(function(u){return u.company===acct}))return;
+    var userNames=a.users.map(function(u){return u.email}).join(', ');
+    var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+    L.marker([a.lat,a.lng],{icon:icon}).addTo(geoLayer)
+      .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
+  });
 }
 function renderGeoTable(){
   var acct=document.getElementById('geoAcctFilter').value;
@@ -406,10 +428,18 @@ function renderFaChart(){
 renderFaChart();
 
 // ASSET INTEREST TABLE + MAP PINS
-var assetsInit=false,assetMapObj=null,assetPinLayer=null;
+var assetsInit=false,assetMapObj=null,assetPinLayer=null,assetMarkersById={};
+function highlightAsset(i){
+  var m=assetMarkersById[i];
+  if(!m||!assetMapObj)return;
+  assetMapObj.setView(m.getLatLng(),12,{animate:true});
+  m.openPopup();
+  document.getElementById('assetMap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function initAssets(){
   if(assetsInit)return;assetsInit=true;
   var assets=D.assetInterest||[];
+  assets.forEach(function(a,i){a._i=i});
   var userSet={};
   assets.forEach(function(a){a.users.forEach(function(u){userSet[u.email]=1})});
   var sel=document.getElementById('assetUserFilter');
@@ -422,7 +452,7 @@ function initAssets(){
 }
 function renderAssetPins(){
   if(!assetMapObj||!assetPinLayer)return;
-  assetPinLayer.clearLayers();
+  assetPinLayer.clearLayers();assetMarkersById={};
   var filter=document.getElementById('assetUserFilter').value;
   var assets=(D.assetInterest||[]).filter(function(a){
     if(!a.lat||!a.lng)return false;
@@ -434,8 +464,9 @@ function renderAssetPins(){
     var a=assets[i];
     var userNames=filter?filter:a.users.map(function(u){return u.email}).join(', ');
     var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
-    L.marker([a.lat,a.lng],{icon:icon}).addTo(assetPinLayer)
+    var mk=L.marker([a.lat,a.lng],{icon:icon}).addTo(assetPinLayer)
       .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
+    assetMarkersById[a._i]=mk;
     bounds.push([a.lat,a.lng]);
   }
   if(bounds.length>1)assetMapObj.fitBounds(bounds,{padding:[30,30]});
@@ -457,24 +488,11 @@ function renderAssetTable(){
     var ls=a.lastSeen?new Date(a.lastSeen).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     var lsTs=a.lastSeen?new Date(a.lastSeen).getTime():0;
     var nf=a.found===false?' <span class="badge" style="background:#fde68a;color:#92400e">not in DB</span>':'';
-    return '<tr><td><strong>'+(a.name||'—')+'</strong>'+nf+'</td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
+    var clk=(a.lat&&a.lng)?' onclick="highlightAsset('+a._i+')" style="cursor:pointer"':'';
+    return '<tr'+clk+'><td><strong>'+(a.name||'—')+'</strong>'+nf+'</td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
   }).join('');
   sortTbl(document.getElementById('assetTable'));
 }
-
-var origInitMap=initMap;
-initMap=function(){
-  origInitMap();
-  var assets=D.assetInterest||[];
-  for(var i=0;i<assets.length;i++){
-    var a=assets[i];
-    if(!a.lat||!a.lng||!geoMap)continue;
-    var userNames=a.users.map(function(u){return u.email}).join(', ');
-    var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
-    L.marker([a.lat,a.lng],{icon:icon}).addTo(geoMap)
-      .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
-  }
-};
 
 // QUERIES TAB
 var queriesInit=false;
