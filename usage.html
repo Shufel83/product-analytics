@@ -456,7 +456,8 @@ function renderAssetTable(){
     var cnt=filter?filteredUsers.reduce(function(s,u){return s+u.count},0):a.count;
     var ls=a.lastSeen?new Date(a.lastSeen).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     var lsTs=a.lastSeen?new Date(a.lastSeen).getTime():0;
-    return '<tr><td><strong>'+(a.name||'—')+'</strong></td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
+    var nf=a.found===false?' <span class="badge" style="background:#fde68a;color:#92400e">not in DB</span>':'';
+    return '<tr><td><strong>'+(a.name||'—')+'</strong>'+nf+'</td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
   }).join('');
   sortTbl(document.getElementById('assetTable'));
 }
