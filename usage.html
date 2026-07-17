@@ -23,6 +23,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card .label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .card .value{font-size:28px;font-weight:700}
 .card .delta{font-size:12px;margin-top:4px}
+.kpi-section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px}
+.kpi-section-label:not(:first-child){margin-top:4px}
 .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text2)}
 .north-star{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 100%);border:none}
 .north-star .label{color:rgba(255,255,255,.7)} .north-star .value{color:#fff;font-size:36px} .north-star .delta{color:rgba(255,255,255,.8)}
@@ -94,7 +96,7 @@ tr:hover td{background:var(--surface2)}
 <div class="content">
 <div class="panel active" id="panel-summary">
   <div id="sn" class="narrative"></div>
-  <div class="grid" id="sc"></div>
+  <div id="sc"></div>
   <div class="chart-container" id="top3box"><h3>Top 3 Users — Rolling 7 Days</h3><div id="top3"></div></div>
   <div class="chart-container"><h3>Weekly Activity</h3><canvas id="weeklyChart"></canvas></div>
   <div class="chart-container"><h3>Platform Mix (% of weekly activity)</h3><canvas id="platMixChart"></canvas></div>
@@ -249,13 +251,22 @@ document.getElementById('sn').innerHTML='<strong>'+S.extTotal.toLocaleString()+'
   (S.wowPct!==null?'<span class="delta '+wc+'">'+wd+' '+Math.abs(S.wowPct)+'%</span> WoW':'')+
   ' ('+S.thisWeek.toLocaleString()+' this week). <strong>'+S.extAccountCount+'</strong> accounts, <strong>'+S.extUserCount+'</strong> users. Top platform: <strong>'+tpn+'</strong> ('+tpp+'%).'+(topAcc?' Top account: <strong>'+topAcc.company+'</strong> ('+topAcc.total.toLocaleString()+').':'');
 
-document.getElementById('sc').innerHTML='<div class="card north-star"><div class="label">Total External Queries</div><div class="value">'+S.extTotal.toLocaleString()+'</div><div class="delta">'+(S.wowPct!==null?wd+' '+Math.abs(S.wowPct)+'% WoW':'')+'</div></div>'+
-  '<div class="card"><div class="label">This Week</div><div class="value">'+S.thisWeek.toLocaleString()+'</div><div class="delta '+wc+'">vs '+S.lastWeek.toLocaleString()+' last week</div></div>'+
-  '<div class="card"><div class="label">External Users</div><div class="value">'+S.extUserCount+'</div></div>'+
+var K=S.kpi||{};
+function kv(o){return o||{thisWeek:0,lastWeek:0,series:[]}}
+function kcard(label,val,o){var k=kv(o);var badge=wow(k.thisWeek,k.lastWeek);var spark=sparkline(k.series||[]);return '<div class="card"><div class="label">'+label+'</div><div class="value">'+val+'</div><div class="delta">'+badge+' '+spark+'</div></div>'}
+var row1=kcard('Active Accounts / wk',kv(K.activeAccounts).thisWeek,K.activeAccounts)+
+  kcard('Active Users / wk',kv(K.activeUsers).thisWeek,K.activeUsers)+
+  kcard('Queries / wk',kv(K.queries).thisWeek.toLocaleString(),K.queries)+
+  kcard('New Accounts',kv(K.newAccounts).thisWeek,K.newAccounts)+
+  kcard('Returning Accounts',kv(K.returningAccounts).thisWeek,K.returningAccounts)+
+  kcard('Queries / Account',kv(K.queriesPerAccount).thisWeek,K.queriesPerAccount);
+var row2='<div class="card north-star"><div class="label">Total External Queries</div><div class="value">'+S.extTotal.toLocaleString()+'</div><div class="delta">'+(S.wowPct!==null?wd+' '+Math.abs(S.wowPct)+'% WoW':'')+'</div></div>'+
   '<div class="card"><div class="label">External Accounts</div><div class="value">'+S.extAccountCount+'</div></div>'+
+  '<div class="card"><div class="label">External Users</div><div class="value">'+S.extUserCount+'</div></div>'+
   '<div class="card"><div class="label">Claude MCP</div><div class="value">'+S.platforms.claude.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.claudeTW,S.platformWow.claudeLW)+'</div></div>'+
   '<div class="card"><div class="label">ChatGPT MCP</div><div class="value">'+S.platforms.gpt.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.gptTW,S.platformWow.gptLW)+'</div></div>'+
   '<div class="card"><div class="label">Web</div><div class="value">'+S.platforms.web.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.webTW,S.platformWow.webLW)+'</div></div>';
+document.getElementById('sc').innerHTML='<div class="kpi-section-label">This week &middot; trend (6-week)</div><div class="grid">'+row1+'</div><div class="kpi-section-label">All-time scale</div><div class="grid">'+row2+'</div>';
 
 // Top 3 users rolling 7 days
 var top3=D.users.filter(function(u){return!u.internal&&u.thisWeek>0}).sort(function(a,b){return b.thisWeek-a.thisWeek}).slice(0,3);
