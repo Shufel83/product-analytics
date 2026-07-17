@@ -125,8 +125,11 @@ tr:hover td{background:var(--surface2)}
       <button id="geoModeNum" class="filter-btn active" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('#')">#</button>
       <button id="geoModePct" class="filter-btn" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('%')">%</button>
     </div>
-    <select id="geoAcctFilter" onchange="renderGeoTable();renderGeoMap()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
+    <select id="geoAcctFilter" onchange="onGeoAcctChange()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
       <option value="">All accounts</option>
+    </select>
+    <select id="geoUserFilter" onchange="renderGeoTable();renderGeoMap()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All users</option>
     </select>
     <span id="geoNote" style="font-size:11px;color:var(--text2)">MCP + Web queries</span>
   </div>
@@ -135,6 +138,9 @@ tr:hover td{background:var(--surface2)}
 <div class="panel" id="panel-assets">
   <div id="assetMap" style="height:400px;border-radius:10px;margin-bottom:16px"></div>
   <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <select id="assetAcctFilter" onchange="onAssetAcctChange()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
+      <option value="">All accounts</option>
+    </select>
     <select id="assetUserFilter" onchange="renderAssetTable();renderAssetPins()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
       <option value="">All users</option>
     </select>
@@ -319,19 +325,37 @@ function initMap(){
   geoLayer=L.layerGroup().addTo(map);
   var sel=document.getElementById('geoAcctFilter');
   (D.geo.accounts||[]).forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o)});
+  populateGeoUsers();
   renderGeoMap();
   renderGeoTable();
+}
+function geoUsersFor(acct){
+  var ua=D.geo.userAccount||{};
+  var all=Object.keys(ua);
+  return (acct?all.filter(function(u){return ua[u]===acct}):all).sort();
+}
+function populateGeoUsers(){
+  var acct=document.getElementById('geoAcctFilter').value;
+  var sel=document.getElementById('geoUserFilter');
+  sel.innerHTML='<option value="">All users</option>';
+  geoUsersFor(acct).forEach(function(u){var o=document.createElement('option');o.value=u;o.textContent=u;sel.appendChild(o)});
+}
+function onGeoAcctChange(){populateGeoUsers();renderGeoTable();renderGeoMap();}
+function geoZipCount(z,raw,acct,user){
+  if(user)return (D.geo.zipUser[z]||{})[user]||0;
+  if(acct)return (D.geo.zipAcct[z]||{})[acct]||0;
+  return raw;
 }
 function renderGeoMap(){
   if(!geoMap||!geoLayer)return;
   geoLayer.clearLayers();
   var acct=document.getElementById('geoAcctFilter').value;
-  var za=D.geo.zipAcct||{};
+  var user=document.getElementById('geoUserFilter').value;
   var mData=(D.geo.msas||[]).map(function(m){
     var cnt=0,zl=[];
     m.zips.forEach(function(z){
-      var c=z[1];
-      if(acct){c=(za[z[0]]||{})[acct]||0;if(!c)return;}
+      var c=(acct||user)?geoZipCount(z[0],z[1],acct,user):z[1];
+      if((acct||user)&&!c)return;
       cnt+=c;zl.push(z[0]+(z[2]?' '+z[2]:'')+' ('+c+')');
     });
     return {name:m.name,lat:m.lat,lng:m.lng,count:cnt,zips:zl};
@@ -345,7 +369,8 @@ function renderGeoMap(){
   });
   (D.assetInterest||[]).forEach(function(a){
     if(!a.lat||!a.lng)return;
-    if(acct&&!a.users.some(function(u){return u.company===acct}))return;
+    if(user){if(!a.users.some(function(u){return u.email===user}))return;}
+    else if(acct){if(!a.users.some(function(u){return u.company===acct}))return;}
     var userNames=a.users.map(function(u){return u.email}).join(', ');
     var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
     L.marker([a.lat,a.lng],{icon:icon}).addTo(geoLayer)
@@ -354,7 +379,7 @@ function renderGeoMap(){
 }
 function renderGeoTable(){
   var acct=document.getElementById('geoAcctFilter').value;
-  var za=D.geo.zipAcct||{};
+  var user=document.getElementById('geoUserFilter').value;
   var msas=D.geo.msas;
   var wks=D.geo.weeks||[];
   var filtered=[];
@@ -365,10 +390,10 @@ function renderGeoTable(){
     var mTotal=0,mWeekly=wks.map(function(){return 0});
     m.zips.forEach(function(z){
       var zipCode=z[0],cnt=z[1],city=z[2],zwk=z[3]||[];
-      if(acct){
-        var acctCnt=(za[zipCode]||{})[acct]||0;
-        if(acctCnt===0)return;
-        cnt=acctCnt;
+      if(acct||user){
+        var fc=geoZipCount(zipCode,cnt,acct,user);
+        if(fc===0)return;
+        cnt=fc;
       }
       mTotal+=cnt;
       var fzwk=zwk.slice();
@@ -436,14 +461,38 @@ function highlightAsset(i){
   m.openPopup();
   document.getElementById('assetMap').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+function assetAcctList(){
+  var s={};(D.assetInterest||[]).forEach(function(a){a.users.forEach(function(u){if(u.company)s[u.company]=1})});
+  return Object.keys(s).sort();
+}
+function assetUsersFor(acct){
+  var s={};(D.assetInterest||[]).forEach(function(a){a.users.forEach(function(u){if(!acct||u.company===acct)s[u.email]=1})});
+  return Object.keys(s).sort();
+}
+function populateAssetUsers(){
+  var acct=document.getElementById('assetAcctFilter').value;
+  var sel=document.getElementById('assetUserFilter');
+  sel.innerHTML='<option value="">All users</option>';
+  assetUsersFor(acct).forEach(function(e){var o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o)});
+}
+function onAssetAcctChange(){populateAssetUsers();renderAssetTable();renderAssetPins();}
+function assetPasses(a,acct,user){
+  if(acct&&!a.users.some(function(u){return u.company===acct}))return false;
+  if(user&&!a.users.some(function(u){return u.email===user}))return false;
+  return true;
+}
+function assetUserSubset(a,acct,user){
+  if(user)return a.users.filter(function(u){return u.email===user});
+  if(acct)return a.users.filter(function(u){return u.company===acct});
+  return a.users;
+}
 function initAssets(){
   if(assetsInit)return;assetsInit=true;
   var assets=D.assetInterest||[];
   assets.forEach(function(a,i){a._i=i});
-  var userSet={};
-  assets.forEach(function(a){a.users.forEach(function(u){userSet[u.email]=1})});
-  var sel=document.getElementById('assetUserFilter');
-  Object.keys(userSet).sort().forEach(function(e){var o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o)});
+  var asel=document.getElementById('assetAcctFilter');
+  assetAcctList().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;asel.appendChild(o)});
+  populateAssetUsers();
   assetMapObj=L.map('assetMap').setView([39.8,-98.5],4);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM & Carto',maxZoom:18}).addTo(assetMapObj);
   assetPinLayer=L.layerGroup().addTo(assetMapObj);
@@ -453,16 +502,13 @@ function initAssets(){
 function renderAssetPins(){
   if(!assetMapObj||!assetPinLayer)return;
   assetPinLayer.clearLayers();assetMarkersById={};
-  var filter=document.getElementById('assetUserFilter').value;
-  var assets=(D.assetInterest||[]).filter(function(a){
-    if(!a.lat||!a.lng)return false;
-    if(!filter)return true;
-    return a.users.some(function(u){return u.email===filter});
-  });
+  var acct=document.getElementById('assetAcctFilter').value;
+  var user=document.getElementById('assetUserFilter').value;
+  var assets=(D.assetInterest||[]).filter(function(a){return a.lat&&a.lng&&assetPasses(a,acct,user);});
   var bounds=[];
   for(var i=0;i<assets.length;i++){
     var a=assets[i];
-    var userNames=filter?filter:a.users.map(function(u){return u.email}).join(', ');
+    var userNames=assetUserSubset(a,acct,user).map(function(u){return u.email}).join(', ');
     var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
     var mk=L.marker([a.lat,a.lng],{icon:icon}).addTo(assetPinLayer)
       .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
@@ -473,18 +519,17 @@ function renderAssetPins(){
   else if(bounds.length===1)assetMapObj.setView(bounds[0],8);
 }
 function renderAssetTable(){
-  var filter=document.getElementById('assetUserFilter').value;
-  var assets=(D.assetInterest||[]).filter(function(a){
-    if(!filter)return true;
-    return a.users.some(function(u){return u.email===filter});
-  });
+  var acct=document.getElementById('assetAcctFilter').value;
+  var user=document.getElementById('assetUserFilter').value;
+  var active=acct||user;
+  var assets=(D.assetInterest||[]).filter(function(a){return assetPasses(a,acct,user);});
   document.getElementById('assetCount').textContent=assets.length+' asset'+(assets.length!==1?'s':'');
-  if(!assets.length){document.getElementById('assetBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No asset-level data'+(filter?' for this user':'')+'</td></tr>';return}
+  if(!assets.length){document.getElementById('assetBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No asset-level data'+(active?' for this filter':'')+'</td></tr>';return}
   document.getElementById('assetBody').innerHTML=assets.map(function(a){
-    var filteredUsers=filter?a.users.filter(function(u){return u.email===filter}):a.users;
+    var filteredUsers=assetUserSubset(a,acct,user);
     var userList=filteredUsers.map(function(u){return u.email+(u.company?' <span class="badge external">'+u.company+'</span>':'')}).join(', ');
     var srcBadges=a.sources.map(function(s){return '<span class="badge '+(s==='web'?'internal':'external')+'">'+s+'</span>'}).join(' ');
-    var cnt=filter?filteredUsers.reduce(function(s,u){return s+u.count},0):a.count;
+    var cnt=active?filteredUsers.reduce(function(s,u){return s+u.count},0):a.count;
     var ls=a.lastSeen?new Date(a.lastSeen).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     var lsTs=a.lastSeen?new Date(a.lastSeen).getTime():0;
     var nf=a.found===false?' <span class="badge" style="background:#fde68a;color:#92400e">not in DB</span>':'';
@@ -572,7 +617,7 @@ function renderActivity(){
 function toggleSess(i){var r=document.getElementById('sess'+i);if(r)r.style.display=r.style.display==='none'?'':'none';}
 
 // Expose handlers referenced by inline on* attributes (IIFE scope -> global).
-window.setFaPeriod=setFaPeriod;window.setGeoMode=setGeoMode;window.renderGeoTable=renderGeoTable;window.renderGeoMap=renderGeoMap;window.renderAssetTable=renderAssetTable;window.renderAssetPins=renderAssetPins;window.highlightAsset=highlightAsset;window.renderQueryTable=renderQueryTable;
+window.setFaPeriod=setFaPeriod;window.setGeoMode=setGeoMode;window.renderGeoTable=renderGeoTable;window.renderGeoMap=renderGeoMap;window.onGeoAcctChange=onGeoAcctChange;window.renderAssetTable=renderAssetTable;window.renderAssetPins=renderAssetPins;window.onAssetAcctChange=onAssetAcctChange;window.highlightAsset=highlightAsset;window.renderQueryTable=renderQueryTable;
 window.setActView=setActView;window.renderActivity=renderActivity;window.toggleSess=toggleSess;
 })();
 </script>
