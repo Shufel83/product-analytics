@@ -455,7 +455,8 @@ function renderAssetTable(){
     var srcBadges=a.sources.map(function(s){return '<span class="badge '+(s==='web'?'internal':'external')+'">'+s+'</span>'}).join(' ');
     var cnt=filter?filteredUsers.reduce(function(s,u){return s+u.count},0):a.count;
     var ls=a.lastSeen?new Date(a.lastSeen).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
-    return '<tr><td><strong>'+(a.name||'—')+'</strong></td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
+    var lsTs=a.lastSeen?new Date(a.lastSeen).getTime():0;
+    return '<tr><td><strong>'+(a.name||'—')+'</strong></td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
   }).join('');
   sortTbl(document.getElementById('assetTable'));
 }
@@ -535,12 +536,18 @@ function renderActivity(){
     document.getElementById('actCount').textContent=sessions.length+' session'+(sessions.length!==1?'s':'');
     if(!sessions.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No sessions found</td></tr>';return}
     body.innerHTML=sessions.map(function(s,i){
+      var ts=s.start?new Date(s.start).getTime():0;
       var dur=s.durationMin>0?s.durationMin+'m':'<1m';
       var steps=s.actions.map(function(a){return '<div style="padding:2px 0;font-size:12px"><span style="color:var(--text2)">'+fdt(a.time)+'</span> — '+a.name+(a.detail?' <span style="color:var(--text2);font-size:11px">'+a.detail+'</span>':'')+'</div>'}).join('');
-      var main='<tr style="cursor:pointer" onclick="toggleSess('+i+')"><td>'+s.user+'</td><td>'+(s.company||'—')+'</td><td>'+fdt(s.start)+'</td><td>'+dur+'</td><td>'+s.count+'</td><td class="query-text" style="max-width:380px">'+s.flowPreview+'</td></tr>';
-      var det='<tr id="sess'+i+'" style="display:none"><td colspan="6" style="padding-left:16px">'+steps+'</td></tr>';
-      return main+det;
+      return '<tr style="cursor:pointer" onclick="toggleSess('+i+')"><td>'+s.user+'</td><td>'+(s.company||'—')+'</td>'+
+        '<td data-sort-value="'+ts+'">'+fdt(s.start)+'</td>'+
+        '<td data-sort-value="'+s.durationMin+'">'+dur+'</td>'+
+        '<td>'+s.count+'</td>'+
+        '<td class="query-text" style="max-width:380px">'+s.flowPreview+
+          '<div id="sess'+i+'" style="display:none;margin-top:6px;border-top:1px solid var(--border);padding-top:6px">'+steps+'</div>'+
+        '</td></tr>';
     }).join('');
+    sortTbl(document.getElementById('actTable'));
   }
 }
 function toggleSess(i){var r=document.getElementById('sess'+i);if(r)r.style.display=r.style.display==='none'?'':'none';}
