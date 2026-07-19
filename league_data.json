@@ -421,11 +421,20 @@
       "start": "2026-07-13",
       "end": "2026-07-19",
       "benchmark": {
-        "score": 59.2,
-        "sessions": 37,
-        "days": 5
+        "score": 78.3,
+        "sessions": 47,
+        "days": 6
       },
       "players": [
+        {
+          "name": "Oleg",
+          "score": 24,
+          "sessions": 24,
+          "bugs": 0,
+          "webSessions": 24,
+          "mcpSessions": 0,
+          "mult": 1
+        },
         {
           "name": "Dor",
           "score": 23.5,
@@ -434,15 +443,6 @@
           "webSessions": 11,
           "mcpSessions": 1,
           "mult": 1.13
-        },
-        {
-          "name": "Oleg",
-          "score": 23,
-          "sessions": 23,
-          "bugs": 0,
-          "webSessions": 23,
-          "mcpSessions": 0,
-          "mult": 1
         },
         {
           "name": "Eden",
@@ -546,12 +546,12 @@
         },
         {
           "name": "Tal",
-          "score": 59.2,
-          "sessions": 37,
+          "score": 78.3,
+          "sessions": 47,
           "bugs": 0,
-          "webSessions": 20,
-          "mcpSessions": 17,
-          "mult": 1.6,
+          "webSessions": 24,
+          "mcpSessions": 23,
+          "mult": 1.67,
           "reference": true,
           "boss": true
         }
@@ -598,7 +598,8 @@
           "2026-07-14": 1,
           "2026-07-15": 1,
           "2026-07-16": 1,
-          "2026-07-17": 1
+          "2026-07-17": 1,
+          "2026-07-18": 1
         },
         "Omer": {
           "2026-07-13": 1,
@@ -612,7 +613,8 @@
           "2026-07-14": 1,
           "2026-07-15": 1,
           "2026-07-16": 1,
-          "2026-07-17": 1
+          "2026-07-17": 1,
+          "2026-07-18": 1
         },
         "Shuf": {
           "2026-07-13": 1,
