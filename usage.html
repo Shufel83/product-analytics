@@ -120,6 +120,7 @@ tr:hover td{background:var(--surface2)}
   <div class="table-wrap"><table id="ut2"><thead><tr><th>User</th><th>Last Active</th><th>This Week</th><th>Total</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
 </div>
 <div class="panel" id="panel-accounts">
+  <div id="attnBox" style="display:none;margin-bottom:16px;padding:12px 14px;border:1px solid var(--red);border-radius:8px;background:rgba(220,38,38,.06)"><div style="font-weight:600;font-size:13px;color:var(--red);margin-bottom:6px">Needs attention — active but not marked live in the roster</div><div id="attnList" style="font-size:13px;color:var(--text)"></div></div>
   <div class="table-wrap"><table id="at2"><thead><tr><th>Status</th><th>Account</th><th>Active Users</th><th>Last Active</th><th>This Week</th><th>Total</th><th>Trend</th><th>6w Sparkline</th></tr></thead><tbody></tbody></table></div>
 </div>
 <div class="panel" id="panel-geography">
@@ -197,8 +198,6 @@ try {
   return;
 }
 S = D.summary;
-var offboardedEmails=['jack@mentiscp.com','kate@hpiproperties.com','michael@hpiproperties.com','marc@prizmainvestments.com','avi@prizmainvestments.com','mcrane@sageventures.com','mlibrowicz@sageventures.com','stenenbaum@sageventures.com'];
-var offboardedDomains=['hpiproperties.com','prizmainvestments.com','sageventures.com','mentiscp.com'];
 
 document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){
   document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
@@ -320,18 +319,28 @@ D.users.forEach(function(u){
   if(rw.length&&rw[rw.length-1]>0)accActiveMap[dom].active++;
 });
 function trendBadge(t){var c=t==='growing'?'var(--green)':t==='declining'?'var(--red)':'var(--text2)';var icon=t==='growing'?'↑':t==='declining'?'↓':'→';return '<span style="color:'+c+';font-weight:600">'+icon+' '+t.charAt(0).toUpperCase()+t.slice(1)+'</span>'}
-function accStatusDot(a){var dom=(a.domain||'').toLowerCase();if(offboardedDomains.indexOf(dom)!==-1)return'offboarded';var rw=a.weeklyHistory||[];if(rw.length&&rw[rw.length-1]>0)return'active';return'dormant'}
-var ext=D.accounts.filter(function(a){return!a.internal&&accStatusDot(a)!=='offboarded'});
+function accActive(a){var rw=a.weeklyHistory||[];return rw.length&&rw[rw.length-1]>0}
+// Roster status (a.status from Sheet30) drives the churn label; activity is a separate axis.
+function accStatusCell(a){
+  var active=accActive(a);
+  if(a.status==='live')return active?['var(--green)','Live']:['#9ca3af','Live · dormant'];
+  if(a.status==='off-boarded')return active?['var(--red)','Off-boarded ⚠']:['#9ca3af','Off-boarded'];
+  return active?['#D97706','Unlisted ⚠']:['#9ca3af','Unlisted'];
+}
+// Hide only fully-churned accounts (off-boarded AND no activity). Everything active stays visible.
+var ext=D.accounts.filter(function(a){return!a.internal&&!(a.status==='off-boarded'&&!accActive(a))});
 document.querySelector('#at2 tbody').innerHTML=ext.map(function(a){
-  var st=accStatusDot(a);
-  var dotC=st==='active'?'var(--green)':'#9ca3af';
-  var dot='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+dotC+'"></span> '+st.charAt(0).toUpperCase()+st.slice(1);
+  var sc=accStatusCell(a);
+  var dot='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+sc[0]+'"></span> '+sc[1];
   var am=accActiveMap[a.domain]||{active:0,total:0};
   var auColor=am.active>0?'var(--green)':'var(--text2)';
   var laTs=a.lastActive?new Date(a.lastActive).getTime():0;
   return '<tr><td>'+dot+'</td><td>'+a.company+'</td><td style="color:'+auColor+';font-weight:600">'+am.active+'/'+am.total+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+trendBadge(a.trend)+'</td><td>'+sparkline(a.weeklyHistory)+'</td></tr>'
 }).join('');
 sortTbl(document.getElementById('at2'));
+// Attention callout — accounts active this week but not marked live in the roster.
+var attn=D.attention||[];
+if(attn.length){document.getElementById('attnBox').style.display='block';document.getElementById('attnList').innerHTML=attn.map(function(x){return '<div style="padding:3px 0">• <strong>'+x.company+'</strong> ('+x.domain+') — roster: '+x.status+', but '+x.thisWeek+' queries this week across '+x.users+(x.users===1?' user':' users')+'</div>'}).join('')}
 
 
 // GEOGRAPHY
