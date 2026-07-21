@@ -309,15 +309,6 @@ document.querySelector('#ut2 tbody').innerHTML=extUsers.map(function(u){var laTs
 sortTbl(document.getElementById('ut2'));
 
 // ACCOUNTS
-var accActiveMap={};
-D.users.forEach(function(u){
-  if(u.internal)return;
-  var dom=u.email.split('@')[1]||'';
-  if(!accActiveMap[dom])accActiveMap[dom]={active:0,total:0};
-  accActiveMap[dom].total++;
-  var rw=u.recentWeeks||[];
-  if(rw.length&&rw[rw.length-1]>0)accActiveMap[dom].active++;
-});
 function trendBadge(t){var c=t==='growing'?'var(--green)':t==='declining'?'var(--red)':'var(--text2)';var icon=t==='growing'?'↑':t==='declining'?'↓':'→';return '<span style="color:'+c+';font-weight:600">'+icon+' '+t.charAt(0).toUpperCase()+t.slice(1)+'</span>'}
 function accActive(a){var rw=a.weeklyHistory||[];return rw.length&&rw[rw.length-1]>0}
 // Roster status (a.status from Sheet30) drives the churn label; activity is a separate axis.
@@ -332,10 +323,9 @@ var ext=D.accounts.filter(function(a){return!a.internal&&!(a.status==='off-board
 document.querySelector('#at2 tbody').innerHTML=ext.map(function(a){
   var sc=accStatusCell(a);
   var dot='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+sc[0]+'"></span> '+sc[1];
-  var am=accActiveMap[a.domain]||{active:0,total:0};
-  var auColor=am.active>0?'var(--green)':'var(--text2)';
+  var auColor=a.activeUsers>0?'var(--green)':'var(--text2)';
   var laTs=a.lastActive?new Date(a.lastActive).getTime():0;
-  return '<tr><td>'+dot+'</td><td>'+a.company+'</td><td style="color:'+auColor+';font-weight:600">'+am.active+'/'+am.total+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+trendBadge(a.trend)+'</td><td>'+sparkline(a.weeklyHistory)+'</td></tr>'
+  return '<tr><td>'+dot+'</td><td>'+a.company+'</td><td style="color:'+auColor+';font-weight:600">'+a.activeUsers+'/'+a.users+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+trendBadge(a.trend)+'</td><td>'+sparkline(a.weeklyHistory)+'</td></tr>'
 }).join('');
 sortTbl(document.getElementById('at2'));
 // Attention callout — accounts active this week but not marked live in the roster.
