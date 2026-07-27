@@ -96,6 +96,7 @@ tr:hover td{background:var(--surface2)}
 <div class="content">
 <div class="panel active" id="panel-summary">
   <div id="sn" class="narrative"></div>
+  <div style="font-size:11px;color:var(--text2);margin:-4px 0 12px;padding:8px 12px;border-left:3px solid var(--border);background:var(--surface)">As of 2026-07-27, web queries are counted from the app database (every question actually asked in the AI composer), replacing the earlier PostHog composer-interaction proxy. This makes web numbers exact; the total moved because the old proxy both over- and under-counted, not because usage changed. MCP (Claude &amp; ChatGPT) counts are unaffected.</div>
   <div id="sc"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div class="chart-container" id="top3box" style="margin:0"><h3>Top 3 Users — Rolling 7 Days</h3><div id="top3"></div></div>
