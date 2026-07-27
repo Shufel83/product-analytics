@@ -799,13 +799,13 @@
         },
         {
           "name": "Shuf",
-          "score": 14,
-          "sessions": 13,
-          "bugs": 0,
-          "webSessions": 2,
+          "score": 22.5,
+          "sessions": 18,
+          "webSessions": 7,
           "mcpSessions": 11,
+          "mult": 1.25,
+          "bugs": 0,
           "gptSessions": 0,
-          "mult": 1.08,
           "reference": true
         },
         {
@@ -898,8 +898,8 @@
           "2026-07-26": 1
         },
         "Shuf": {
-          "2026-07-21": 1,
           "2026-07-20": 1,
+          "2026-07-21": 1,
           "2026-07-22": 1,
           "2026-07-23": 1,
           "2026-07-24": 1,
@@ -1038,6 +1038,17 @@
           "mult": 1
         },
         {
+          "name": "Shuf",
+          "score": 1,
+          "sessions": 1,
+          "webSessions": 1,
+          "mcpSessions": 0,
+          "mult": 1,
+          "bugs": 0,
+          "gptSessions": 0,
+          "reference": true
+        },
+        {
           "name": "Tal",
           "score": 0,
           "sessions": 0,
@@ -1064,6 +1075,9 @@
           "2026-07-27": 1
         },
         "Omer": {
+          "2026-07-27": 1
+        },
+        "Shuf": {
           "2026-07-27": 1
         }
       },
