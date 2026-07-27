@@ -536,11 +536,11 @@
         },
         {
           "name": "Sveto",
-          "score": 0,
-          "sessions": 0,
+          "score": 1,
+          "sessions": 1,
           "bugs": 0,
           "webSessions": 0,
-          "mcpSessions": 0,
+          "mcpSessions": 1,
           "mult": 1,
           "gptSessions": 0
         },
@@ -649,6 +649,9 @@
           "2026-07-15": 1,
           "2026-07-16": 1,
           "2026-07-17": 1
+        },
+        "Sveto": {
+          "2026-07-13": 1
         },
         "Tal": {
           "2026-07-13": 1,
@@ -779,11 +782,11 @@
         },
         {
           "name": "Sveto",
-          "score": 0,
-          "sessions": 0,
+          "score": 3,
+          "sessions": 3,
           "bugs": 0,
-          "webSessions": 0,
-          "mcpSessions": 0,
+          "webSessions": 2,
+          "mcpSessions": 1,
           "gptSessions": 0,
           "mult": 1
         },
@@ -887,6 +890,10 @@
           "2026-07-23": 1,
           "2026-07-24": 1,
           "2026-07-25": 1,
+          "2026-07-26": 1
+        },
+        "Sveto": {
+          "2026-07-20": 1,
           "2026-07-26": 1
         },
         "Tal": {
