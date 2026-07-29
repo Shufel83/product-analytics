@@ -56,9 +56,9 @@
   </div>
 
   <div id="plean" class="panel on">
-    <div class="note"><b>Raw metrics, nothing normalized or weighted.</b> Web gets three charts — minutes, sessions, and actions — each a 7d headline number plus a weekly sparkline. MCP gets tool calls. Each sparkline scales to its own metric's max across users; the rightmost (blue) bar is the most recent week.</div>
+    <div class="note"><b>Metrics are raw; the leaderboard bar is relative.</b> The horizontal bar ranks each user's 7d volume as a % of the top user (web = minutes, MCP = tool calls) — so #1 is always full and the rest are read against them. The three sparklines (minutes, sessions, actions; MCP: tool calls) are raw counts, each scaled to its own metric's weekly max. A weekly bar turns gold only when it led a week that had 2+ active users.</div>
     <h2 class="sec"><span class="dot web"></span>Web <span class="secn">— 13 users, ranked by 7d score</span></h2>
-    <table><thead><tr><th>#</th><th>User</th><th>Score (7d)</th><th>Minutes</th><th>Sessions</th><th>Actions</th></tr></thead><tbody><tr>
+    <table><thead><tr><th>#</th><th>User</th><th>Minutes vs top</th><th>Minutes</th><th>Sessions</th><th>Actions</th></tr></thead><tbody><tr>
       <td class="rk">1</td>
       <td class="usr">miamibeverly1993@gmail.com<div class="co">gmail.com</div></td>
       <td><div class="barwrap"><div class="bar web" style="width:100%"></div><span>100</span></div></td>
@@ -111,8 +111,8 @@
       <td class="usr">dov@lobodaproperties.com<div class="co">Loboda Properties</div></td>
       <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
       <td><div class="mcell"><b class="mnum">0</b><span class="mspark"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 54"><i style="height:24%"></i><em>54</em></span><span class="wkc" title="Jul 13: 32"><i style="height:14%"></i><em>32</em></span><span class="wkc" title="Jul 20: 22"><i style="height:10%"></i><em>22</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></span></div></td>
-      <td><div class="mcell"><b class="mnum">1</b><span class="mspark"><span class="wkc lead" title="Jun 29: 1 — weekly leader"><i style="height:20%"></i><em>1</em></span><span class="wkc" title="Jul 6: 2"><i style="height:40%"></i><em>2</em></span><span class="wkc" title="Jul 13: 2"><i style="height:40%"></i><em>2</em></span><span class="wkc" title="Jul 20: 1"><i style="height:20%"></i><em>1</em></span><span class="wkc last" title="Jul 27: 1"><i style="height:20%"></i><em>1</em></span></span></div></td>
-      <td><div class="mcell"><b class="mnum">2</b><span class="mspark"><span class="wkc lead" title="Jun 29: 5 — weekly leader"><i style="height:9%"></i><em>5</em></span><span class="wkc lead" title="Jul 6: 55 — weekly leader"><i style="height:100%"></i><em>55</em></span><span class="wkc" title="Jul 13: 10"><i style="height:18%"></i><em>10</em></span><span class="wkc" title="Jul 20: 5"><i style="height:9%"></i><em>5</em></span><span class="wkc last" title="Jul 27: 2"><i style="height:4%"></i><em>2</em></span></span></div></td>
+      <td><div class="mcell"><b class="mnum">1</b><span class="mspark"><span class="wkc" title="Jun 29: 1"><i style="height:20%"></i><em>1</em></span><span class="wkc" title="Jul 6: 2"><i style="height:40%"></i><em>2</em></span><span class="wkc" title="Jul 13: 2"><i style="height:40%"></i><em>2</em></span><span class="wkc" title="Jul 20: 1"><i style="height:20%"></i><em>1</em></span><span class="wkc last" title="Jul 27: 1"><i style="height:20%"></i><em>1</em></span></span></div></td>
+      <td><div class="mcell"><b class="mnum">2</b><span class="mspark"><span class="wkc" title="Jun 29: 5"><i style="height:9%"></i><em>5</em></span><span class="wkc lead" title="Jul 6: 55 — weekly leader"><i style="height:100%"></i><em>55</em></span><span class="wkc" title="Jul 13: 10"><i style="height:18%"></i><em>10</em></span><span class="wkc" title="Jul 20: 5"><i style="height:9%"></i><em>5</em></span><span class="wkc last" title="Jul 27: 2"><i style="height:4%"></i><em>2</em></span></span></div></td>
     </tr>
 <tr>
       <td class="rk">8</td>
@@ -162,11 +162,11 @@
       <td><div class="mcell"><b class="mnum">0</b><span class="mspark"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 2"><i style="height:40%"></i><em>2</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></span></div></td>
       <td><div class="mcell"><b class="mnum">0</b><span class="mspark"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 14"><i style="height:25%"></i><em>14</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></span></div></td>
     </tr></tbody></table><h2 class="sec"><span class="dot MCP"></span>MCP <span class="secn">— 3 users, ranked by 7d tool calls</span></h2>
-    <table><thead><tr><th>#</th><th>User</th><th>Score (7d)</th><th>Tool calls</th></tr></thead><tbody><tr>
+    <table><thead><tr><th>#</th><th>User</th><th>Calls vs top</th><th>Tool calls</th></tr></thead><tbody><tr>
       <td class="rk">1</td>
       <td class="usr">jim.oates@reichardcapital.com<div class="co">Reichard Capital</div></td>
       <td><div class="barwrap"><div class="bar MCP" style="width:100%"></div><span>12</span></div></td>
-      <td><div class="mcell"><b class="mnum">12</b><span class="mspark"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc lead" title="Jul 13: 318 — weekly leader"><i style="height:100%"></i><em>318</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc lead" title="Jul 27: 12 — weekly leader"><i style="height:4%"></i><em>12</em></span></span></div></td>
+      <td><div class="mcell"><b class="mnum">12</b><span class="mspark"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc lead" title="Jul 13: 318 — weekly leader"><i style="height:100%"></i><em>318</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 12"><i style="height:4%"></i><em>12</em></span></span></div></td>
     </tr>
 <tr>
       <td class="rk">2</td>
