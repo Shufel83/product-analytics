@@ -88,6 +88,17 @@ tr:hover td{background:var(--surface2)}
 .ecell b{font-size:13px;font-weight:700;min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
 .eng-rk{color:var(--text2);width:30px;font-variant-numeric:tabular-nums}
 .eng-usr{font-weight:600} .eng-usr .eco{color:var(--text2);font-weight:400;font-size:12px}
+.mcell{display:flex;align-items:flex-end;gap:8px}
+.mnum{font-size:13px;font-weight:700;min-width:26px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text)}
+.mspark{display:inline-flex;gap:3px;white-space:nowrap}
+.wkc{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-end;width:20px;height:34px}
+.wkc i{display:block;width:14px;background:var(--border);border-radius:2px 2px 0 0}
+.wkc em{font-style:normal;font-size:9px;line-height:1.1;margin-top:2px;color:var(--text2);font-variant-numeric:tabular-nums}
+.wkc.last i{background:var(--accent)}
+.wkc.lead i{background:var(--yellow)}
+.wkc.lead em{color:var(--yellow);font-weight:700}
+.wkc.na i{background:transparent}
+.wkc.na em{color:var(--border)}
 @media(max-width:768px){.grid{grid-template-columns:repeat(2,1fr)}.card .value{font-size:22px}.north-star .value{font-size:28px}.content{padding:12px}.tab{padding:10px 12px;font-size:12px}.query-text{max-width:150px}#map{height:280px}.chart-row{grid-template-columns:1fr}.trends-grid{grid-template-columns:1fr}.top3-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:8px}.card{padding:12px}.card .value{font-size:20px}}
 </style>
@@ -675,20 +686,21 @@ function toggleSess(i){var r=document.getElementById('sess'+i);if(r)r.style.disp
 var engInit=false;
 function initEngagement(){if(engInit)return;engInit=true;renderEngagement();}
 function engEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function engSpark(arr,max,leaders){
-  var bars=arr.map(function(v,i){
-    var x=i*12+1;
-    if(v==null)return '<rect x="'+x+'" y="18" width="9" height="1" rx="1" fill="#e5e7eb"/>';
+function engSpark(arr,max,leaders,labels){
+  var cols=arr.map(function(v,i){
+    var lbl=(labels&&labels[i])||'';
+    if(v==null)return '<span class="wkc na" title="'+lbl+': no data"><i style="height:0%"></i><em>·</em></span>';
     var isLead=v>0&&leaders&&leaders[i]!=null&&v===leaders[i];
-    var h=v>0?Math.max(Math.round(v/(max||1)*18),2):0;
-    var fill=isLead?'var(--yellow)':(i===arr.length-1?'var(--accent)':'#cbd5e1');
-    return '<rect x="'+x+'" y="'+(20-h)+'" width="9" height="'+h+'" rx="1" fill="'+fill+'"/>';
+    var h=v>0?Math.max(Math.round(v/(max||1)*100),8):0;
+    var cls=isLead?'wkc lead':(i===arr.length-1?'wkc last':'wkc');
+    var ttl=lbl+': '+v+(isLead?' — weekly leader':'');
+    return '<span class="'+cls+'" title="'+ttl+'"><i style="height:'+h+'%"></i><em>'+v+'</em></span>';
   }).join('');
-  return '<svg width="'+(arr.length*12)+'" height="20" style="vertical-align:middle">'+bars+'</svg>';
+  return '<span class="mspark">'+cols+'</span>';
 }
 function engTw(arr){var v=arr[arr.length-1];return v==null?0:v;}
 function engBar(val,max,cls){var w=max?Math.round(val/max*100):0;return '<div class="ebarwrap"><div class="ebar '+cls+'" style="width:'+w+'%"></div><span>'+val+'</span></div>';}
-function engCell(headline,spark){return '<div class="ecell"><b>'+headline+'</b>'+spark+'</div>';}
+function engCell(headline,spark){return '<div class="mcell"><b class="mnum">'+headline+'</b>'+spark+'</div>';}
 function engUsr(email,company){return '<td class="eng-usr">'+engEsc(email)+'<div class="eco">'+engEsc(company||'')+'</div></td>';}
 function renderEngagement(){
   var E=D.engagement;
@@ -698,20 +710,21 @@ function renderEngagement(){
   var wkHdr=E.weeks.map(function(w){return w.label}).join(' · ');
   var webStart=new Date(E.webStart).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});
   if(note)note.innerHTML='<strong>The bar is 7-day rolling; the columns are this week.</strong> The horizontal bar is each user\'s rolling 7d total (web = minutes, MCP = tool calls) — the real number is printed, the bar drawn as a % of the top user. The metric columns show <strong>this calendar week\'s</strong> value with a 5-week sparkline behind it (each scaled to its own weekly max). A weekly bar turns gold when it led a week with 2+ active users.<div style="font-size:12px;color:var(--text2);margin-top:8px">External users · rolling 7d '+range+' · weekly trend '+wkHdr+' (Mon-start). Web logging began '+webStart+'.</div>';
+  var EW=E.weeks.map(function(w){return w.label});
   var W=E.web,wt='';
   W.rows.forEach(function(r,i){
     wt+='<tr><td class="eng-rk">'+(i+1)+'</td>'+engUsr(r.email,r.company)+
       '<td>'+engBar(r.rollMin,W.rollMax,'web')+'</td>'+
-      '<td>'+engCell(engTw(r.mMin),engSpark(r.mMin,W.minMax,W.leadMin))+'</td>'+
-      '<td>'+engCell(engTw(r.mSess),engSpark(r.mSess,W.sessMax,W.leadSess))+'</td>'+
-      '<td>'+engCell(engTw(r.mAct),engSpark(r.mAct,W.actMax,W.leadAct))+'</td></tr>';
+      '<td>'+engCell(engTw(r.mMin),engSpark(r.mMin,W.minMax,W.leadMin,EW))+'</td>'+
+      '<td>'+engCell(engTw(r.mSess),engSpark(r.mSess,W.sessMax,W.leadSess,EW))+'</td>'+
+      '<td>'+engCell(engTw(r.mAct),engSpark(r.mAct,W.actMax,W.leadAct,EW))+'</td></tr>';
   });
   document.getElementById('engWeb').innerHTML='<div class="table-wrap"><h3 class="eng-h"><span class="edot web"></span>Web <span class="esub">— '+W.rows.length+' users, ranked by 7d rolling minutes</span></h3><table><thead><tr><th>#</th><th>User</th><th>Minutes · 7d rolling</th><th>Minutes · this wk</th><th>Sessions · this wk</th><th>Actions · this wk</th></tr></thead><tbody>'+(wt||'<tr><td colspan="6" style="text-align:center;color:var(--text2)">No web activity</td></tr>')+'</tbody></table></div>';
   var M=E.mcp,mt='';
   M.rows.forEach(function(r,i){
     mt+='<tr><td class="eng-rk">'+(i+1)+'</td>'+engUsr(r.email,r.company)+
       '<td>'+engBar(r.rollCalls,M.rollMax,'mcp')+'</td>'+
-      '<td>'+engCell(engTw(r.mCall),engSpark(r.mCall,M.callMax,M.leadCall))+'</td></tr>';
+      '<td>'+engCell(engTw(r.mCall),engSpark(r.mCall,M.callMax,M.leadCall,EW))+'</td></tr>';
   });
   document.getElementById('engMcp').innerHTML='<div class="table-wrap"><h3 class="eng-h"><span class="edot mcp"></span>MCP <span class="esub">— '+M.rows.length+' users, ranked by 7d rolling calls</span></h3><table><thead><tr><th>#</th><th>User</th><th>Calls · 7d rolling</th><th>Calls · this wk</th></tr></thead><tbody>'+(mt||'<tr><td colspan="4" style="text-align:center;color:var(--text2)">No MCP activity</td></tr>')+'</tbody></table></div>';
 }
