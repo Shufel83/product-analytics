@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lizo — Product Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--bg:#f8f9fc;--surface:#ffffff;--surface2:#f1f3f9;--text:#1a1d27;--text2:#6b7280;--accent:#7C3AED;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--border:#e5e7eb;--claude:#D97706;--gpt:#10A37F;--web:#7C3AED}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
+.header{padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.header h1{font-size:18px;font-weight:600} .header h1 span{color:var(--accent)} .header .updated{font-size:12px;color:var(--text2)}
+.tabs{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+.tab:hover{color:var(--text)} .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.content{padding:16px;max-width:1200px;margin:0 auto}
+.panel{display:none} .panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card .label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.card .value{font-size:28px;font-weight:700}
+.card .delta{font-size:12px;margin-top:4px}
+.kpi-section-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px}
+.kpi-section-label:not(:first-child){margin-top:4px}
+.delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--text2)}
+.north-star{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 100%);border:none}
+.north-star .label{color:rgba(255,255,255,.7)} .north-star .value{color:#fff;font-size:36px} .north-star .delta{color:rgba(255,255,255,.8)}
+.narrative{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;font-size:14px;line-height:1.6;color:var(--text2)}
+.narrative strong{color:var(--text)}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;overflow:hidden}
+.top3-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-container h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.chart-container canvas{max-height:300px;min-height:200px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;background:var(--surface2);color:var(--text2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--text)} th .sa{font-size:10px;margin-left:4px;opacity:.5}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--surface2)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.badge.internal{background:rgba(124,58,237,.1);color:var(--accent)}
+.badge.external{background:rgba(16,163,127,.1);color:var(--gpt)}
+.badge.error{background:rgba(239,68,68,.15);color:var(--red)}
+.badge.success{background:rgba(34,197,94,.15);color:var(--green)}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow-x:auto;margin-bottom:20px}
+.table-wrap h3{font-size:14px;font-weight:600;padding:16px 16px 0}
+.query-text{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text2)}
+.section-title{font-size:16px;font-weight:600;margin:20px 0 12px}
+#map{height:400px;border-radius:10px;margin-bottom:8px}
+.map-legend{display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:11px;color:var(--text2);padding:0 4px}
+.map-legend .swatch{width:16px;height:12px;border-radius:2px;display:inline-block}
+.geo-table{width:100%;border-collapse:collapse;font-size:13px}
+.geo-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--text2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;position:sticky;top:0}
+.geo-table td{padding:6px 10px;border-bottom:1px solid var(--border)}
+.geo-table .msa-row{cursor:pointer;user-select:none;background:var(--surface)}
+.geo-table .msa-row:hover{background:var(--surface2)}
+.geo-table .msa-row td{font-weight:600}
+.geo-table .msa-row .arrow{font-size:10px;color:var(--text2);margin-right:6px;transition:transform .2s;display:inline-block}
+.geo-table .msa-row.open .arrow{transform:rotate(90deg)}
+.geo-table .zip-row{display:none}
+.geo-table .zip-row td{font-size:12px;color:var(--text2);padding:4px 10px 4px 28px}
+.geo-table .zip-row td:first-child{padding-left:28px}
+.geo-table td.num,.geo-table th.num{text-align:right}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .2s}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.trend-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.trend-item:last-child{border-bottom:none}
+.trend-item .trend-name{flex:1}
+.trend-item .trend-spark{width:56px;flex-shrink:0;text-align:center}
+.trend-item .trend-vals{width:50px;text-align:right;color:var(--text2);font-size:12px;font-weight:600}
+.trends-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.trend-section{margin-bottom:0}
+.trend-section .trend-header{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.trend-section .trend-header .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.eng-h{font-size:14px;font-weight:600;padding:16px 16px 0;display:flex;align-items:center;gap:8px}
+.eng-h .edot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.eng-h .edot.web{background:var(--web)} .eng-h .edot.mcp{background:var(--claude)}
+.eng-h .esub{color:var(--text2);font-weight:400;font-size:12px}
+.ebarwrap{position:relative;background:var(--surface2);border-radius:5px;height:20px;min-width:100px;display:flex;align-items:center}
+.ebar{height:100%;border-radius:5px;position:absolute;left:0;top:0}
+.ebar.web{background:var(--web)} .ebar.mcp{background:var(--claude)}
+.ebarwrap span{position:relative;margin-left:auto;padding-right:7px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.ecell{display:flex;align-items:center;gap:8px}
+.ecell b{font-size:13px;font-weight:700;min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.eng-rk{color:var(--text2);width:30px;font-variant-numeric:tabular-nums}
+.eng-usr{font-weight:600} .eng-usr .eco{color:var(--text2);font-weight:400;font-size:12px}
+.mcell{display:flex;align-items:flex-end;gap:8px}
+.mnum{font-size:13px;font-weight:700;min-width:26px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text)}
+.mspark{display:inline-flex;gap:3px;white-space:nowrap}
+.wkc{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-end;width:20px;height:34px}
+.wkc i{display:block;width:14px;background:var(--border);border-radius:2px 2px 0 0}
+.wkc em{font-style:normal;font-size:9px;line-height:1.1;margin-top:2px;color:var(--text2);font-variant-numeric:tabular-nums}
+.wkc.last i{background:var(--accent)}
+.wkc.lead i{background:var(--yellow)}
+.wkc.lead em{color:var(--yellow);font-weight:700}
+.wkc.na i{background:transparent}
+.wkc.na em{color:var(--border)}
+@media(max-width:768px){.grid{grid-template-columns:repeat(2,1fr)}.card .value{font-size:22px}.north-star .value{font-size:28px}.content{padding:12px}.tab{padding:10px 12px;font-size:12px}.query-text{max-width:150px}#map{height:280px}.chart-row{grid-template-columns:1fr}.trends-grid{grid-template-columns:1fr}.top3-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:8px}.card{padding:12px}.card .value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1><span>lizo</span> — Product Analytics</h1>
+  <div style="display:flex;align-items:center;gap:12px"><div class="updated">Updated: <span id="ut"></span> · External only</div><button onclick="window.location.reload()" style="padding:4px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer">↻ Refresh</button></div>
+</div>
+<div class="tabs">
+  <div class="tab active" data-tab="summary">Summary</div>
+  <div class="tab" data-tab="users">Users</div>
+  <div class="tab" data-tab="accounts">Accounts</div>
+  <div class="tab" data-tab="geography">Geography</div>
+  <div class="tab" data-tab="assets">Assets</div>
+  <div class="tab" data-tab="queries">Data Requests</div>
+  <div class="tab" data-tab="activity">Activity</div>
+  <div class="tab" data-tab="engagement">Engagement</div>
+</div>
+<div class="content">
+<div class="panel active" id="panel-summary">
+  <div id="sn" class="narrative"></div>
+  <div style="font-size:11px;color:var(--text2);margin:-4px 0 12px;padding:8px 12px;border-left:3px solid var(--border);background:var(--surface)">As of 2026-07-27, web queries are counted from the app database (every question actually asked in the AI composer), replacing the earlier PostHog composer-interaction proxy. This makes web numbers exact; the total moved because the old proxy both over- and under-counted, not because usage changed. MCP (Claude &amp; ChatGPT) counts are unaffected.</div>
+  <div id="sc"></div>
+  <div class="top3-grid">
+    <div class="chart-container" id="top3box" style="margin:0"><h3>Top 3 Users — Rolling 7 Days</h3><div id="top3"></div></div>
+    <div class="chart-container" id="top3accbox" style="margin:0"><h3>Top 3 Accounts — Rolling 7 Days</h3><div id="top3acc"></div></div>
+  </div>
+  <div class="chart-container"><h3>Weekly Activity</h3><canvas id="weeklyChart"></canvas></div>
+  <div class="chart-container"><h3>Platform Mix (% of weekly activity)</h3><canvas id="platMixChart"></canvas></div>
+  <div class="chart-container"><h3>Account Trends</h3><div id="accTrends" class="trends-grid"></div></div>
+  <div class="chart-container"><h3>Daily Activity (30 days)</h3><canvas id="dailyChart"></canvas></div>
+  <div class="chart-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0">Feature Adoption — External Users</h3>
+      <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+        <button id="fa7d" class="filter-btn" style="border:none;border-radius:0;margin:0;padding:4px 10px;font-size:11px" onclick="setFaPeriod('7d')">7d</button>
+        <button id="fa30d" class="filter-btn active" style="border:none;border-radius:0;margin:0;padding:4px 10px;font-size:11px" onclick="setFaPeriod('30d')">30d</button>
+      </div>
+    </div>
+    <canvas id="faChart"></canvas>
+  </div>
+</div>
+<div class="panel" id="panel-users">
+  <div class="table-wrap"><table id="ut2"><thead><tr><th>User</th><th>Last Active</th><th>This Week</th><th>Queries</th><th>Requests</th><th>WoW</th><th>Streak</th><th>6w Trend</th><th>Claude MCP</th><th>GPT MCP</th><th>Web</th></tr></thead><tbody></tbody></table></div>
+</div>
+<div class="panel" id="panel-accounts">
+  <div id="attnBox" style="display:none;margin-bottom:16px;padding:12px 14px;border:1px solid var(--red);border-radius:8px;background:rgba(220,38,38,.06)"><div style="font-weight:600;font-size:13px;color:var(--red);margin-bottom:6px">Needs attention — active but not marked live in the roster</div><div id="attnList" style="font-size:13px;color:var(--text)"></div></div>
+  <div class="table-wrap"><table id="at2"><thead><tr><th>Status</th><th>Account</th><th>Active Users</th><th>Last Active</th><th>This Week</th><th>Queries</th><th>Requests</th><th>Trend</th><th>6w Sparkline</th></tr></thead><tbody></tbody></table></div>
+</div>
+<div class="panel" id="panel-geography">
+  <div id="map"></div>
+  <div class="map-legend"><span>Queries:</span><span class="swatch" style="background:#DDD6FE"></span>1-10<span class="swatch" style="background:#A78BFA"></span>11-50<span class="swatch" style="background:#7C3AED"></span>51-100<span class="swatch" style="background:#581c87"></span>100+</div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+      <button id="geoModeNum" class="filter-btn active" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('#')">#</button>
+      <button id="geoModePct" class="filter-btn" style="border:none;border-radius:0;margin:0" onclick="setGeoMode('%')">%</button>
+    </div>
+    <button id="geoLizoToggle" class="filter-btn" style="margin:0" onclick="toggleLizo()">+ Team (demos)</button>
+    <select id="geoAcctFilter" onchange="onGeoAcctChange()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
+      <option value="">All accounts</option>
+    </select>
+    <select id="geoUserFilter" onchange="renderGeoTable();renderGeoMap()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All users</option>
+    </select>
+    <span id="geoNote" style="font-size:11px;color:var(--text2)">MCP + Web queries</span>
+  </div>
+  <div class="table-wrap"><table class="geo-table" id="geoTable"><thead id="geoHead"></thead><tbody id="geoBody"></tbody></table></div>
+</div>
+<div class="panel" id="panel-assets">
+  <div id="assetMap" style="height:400px;border-radius:10px;margin-bottom:16px"></div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <select id="assetAcctFilter" onchange="onAssetAcctChange()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:140px">
+      <option value="">All accounts</option>
+    </select>
+    <select id="assetUserFilter" onchange="renderAssetTable();renderAssetPins()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All users</option>
+    </select>
+    <span style="font-size:11px;color:var(--text2)" id="assetCount"></span>
+  </div>
+  <div class="table-wrap"><table id="assetTable"><thead><tr><th>Asset</th><th>Address</th><th>Users</th><th>Analyses</th><th>Last Seen</th><th>Source</th></tr></thead><tbody id="assetBody"></tbody></table></div>
+</div>
+<div class="panel" id="panel-queries">
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <select id="queryUserFilter" onchange="renderQueryTable()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All users</option>
+    </select>
+    <select id="querySourceFilter" onchange="renderQueryTable()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text)">
+      <option value="">All sources</option>
+      <option value="Claude">Claude MCP</option>
+      <option value="ChatGPT">ChatGPT MCP</option>
+      <option value="Web">Web</option>
+    </select>
+    <span style="font-size:11px;color:var(--text2)" id="queryCount"></span>
+  </div>
+  <div class="table-wrap"><table id="queryTable"><thead><tr><th>User</th><th>Detail</th><th>Skill / Tool</th><th>Source</th><th>Time</th><th>Status</th></tr></thead><tbody id="queryBody"></tbody></table></div>
+</div>
+<div class="panel" id="panel-activity">
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <select id="actUserFilter" onchange="renderActivity()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All users</option>
+    </select>
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+      <button id="actViewSess" class="filter-btn active" style="border:none;border-radius:0;margin:0;padding:4px 10px;font-size:11px" onclick="setActView('sessions')">Sessions</button>
+      <button id="actViewFlat" class="filter-btn" style="border:none;border-radius:0;margin:0;padding:4px 10px;font-size:11px" onclick="setActView('flat')">Flat log</button>
+    </div>
+    <span style="font-size:11px;color:var(--text2)" id="actCount"></span>
+  </div>
+  <div class="table-wrap"><table id="actTable"><thead id="actHead"></thead><tbody id="actBody"></tbody></table></div>
+</div>
+<div class="panel" id="panel-engagement">
+  <div id="engNote" class="narrative"></div>
+  <div id="engWeb"></div>
+  <div id="engMcp"></div>
+</div>
+</div>
+<script>
+(async function(){
+var D, S;
+try {
+  const _r = await fetch('usage_data.json?t=' + Date.now());
+  if(!_r.ok) throw new Error('HTTP ' + _r.status);
+  D = await _r.json();
+} catch(e){
+  var _u = document.getElementById('ut');
+  if(_u) _u.textContent = 'Data unavailable';
+  console.error('Failed to load usage_data.json', e);
+  return;
+}
+S = D.summary;
+
+document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active')});
+  t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  if(t.dataset.tab==='geography')initMap();
+  if(t.dataset.tab==='assets')initAssets();
+  if(t.dataset.tab==='queries')initQueries();
+  if(t.dataset.tab==='activity')initActivity();
+  if(t.dataset.tab==='engagement')initEngagement();
+})});
+document.getElementById('ut').textContent=new Date(D.updated).toLocaleString('en-US',{timeZone:'Asia/Jerusalem',dateStyle:'medium',timeStyle:'short'});
+
+function sortTbl(tbl){
+  tbl.querySelectorAll('th').forEach(function(th,i){
+    if(!th.querySelector('.sa')){var si=document.createElement('span');si.className='sa';si.textContent=' ⇅';th.appendChild(si)}
+    th.addEventListener('click',function(){
+      var tb=tbl.querySelector('tbody'),rows=Array.from(tb.rows);
+      var asc=th.dataset.sort!=='asc';
+      tbl.querySelectorAll('th').forEach(function(h){h.dataset.sort='';var a=h.querySelector('.sa');if(a)a.textContent=''});
+      th.dataset.sort=asc?'asc':'desc';
+      var ar=th.querySelector('.sa');if(!ar){ar=document.createElement('span');ar.className='sa';th.appendChild(ar)}
+      ar.textContent=asc?' ▲':' ▼';
+      rows.sort(function(a,b){
+        var ca=a.cells[i],cb=b.cells[i];
+        var sva=ca.getAttribute('data-sort-value'),svb=cb.getAttribute('data-sort-value');
+        if(sva!==null&&svb!==null){var na2=parseFloat(sva),nb2=parseFloat(svb);if(!isNaN(na2)&&!isNaN(nb2))return asc?na2-nb2:nb2-na2}
+        var va=ca.textContent.trim().replace(/,/g,'').replace(/[↑↓→%w]/g,''),vb=cb.textContent.trim().replace(/,/g,'').replace(/[↑↓→%w]/g,'');
+        var na=parseFloat(va),nb=parseFloat(vb);
+        if(!isNaN(na)&&!isNaN(nb))return asc?na-nb:nb-na;
+        return asc?va.localeCompare(vb):vb.localeCompare(va);
+      });
+      rows.forEach(function(r){tb.appendChild(r)});
+    });
+  });
+}
+
+function wow(tw,lw,inv){
+  if(!lw||lw===0)return '';
+  var p=Math.round((tw-lw)/lw*100),cls=inv?(p>0?'down':p<0?'up':'flat'):(p>0?'up':p<0?'down':'flat');
+  var ar=p>0?'↑':p<0?'↓':'→';
+  return '<span class="delta '+cls+'">'+ar+' '+Math.abs(p)+'%</span>';
+}
+function fd(ts){if(!ts)return'<span style="color:var(--text2)">—</span>';var d=new Date(ts),now=new Date(),age=Math.floor((now-d)/864e5);var c=age<=7?'#22c55e':age<=30?'#eab308':'#f97316';return'<span style="color:'+c+'">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</span>'}
+function fdt(ts){return ts?new Date(ts).toLocaleString('en-US',{timeZone:'Asia/Jerusalem',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}
+
+// SUMMARY
+var pn={claude:'Claude MCP',gpt:'ChatGPT MCP',web:'Web'};
+var tp=Object.entries(S.platforms).sort(function(a,b){return b[1]-a[1]})[0];
+var tpn=pn[tp[0]]||tp[0],tpp=S.extTotal>0?Math.round(tp[1]/S.extTotal*100):0;
+var wd=S.wowPct>0?'↑':S.wowPct<0?'↓':'→',wc=S.wowPct>0?'up':S.wowPct<0?'down':'flat';
+var topAcc=D.accounts.filter(function(a){return!a.internal}).sort(function(a,b){return b.total-a.total})[0];
+document.getElementById('sn').innerHTML='<strong>'+S.extTotal.toLocaleString()+'</strong> total external queries. '+
+  (S.wowPct!==null?'<span class="delta '+wc+'">'+wd+' '+Math.abs(S.wowPct)+'%</span> WoW':'')+
+  ' ('+S.thisWeek.toLocaleString()+' this week). <strong>'+S.extAccountCount+'</strong> accounts, <strong>'+S.extUserCount+'</strong> users. Top platform: <strong>'+tpn+'</strong> ('+tpp+'%).'+(topAcc?' Top account: <strong>'+topAcc.company+'</strong> ('+topAcc.total.toLocaleString()+').':'');
+
+var K=S.kpi||{};
+function kv(o){return o||{thisWeek:0,lastWeek:0,series:[]}}
+function kcard(label,val,o){var k=kv(o);var badge=wow(k.thisWeek,k.lastWeek);var spark=sparkline(k.series||[]);return '<div class="card"><div class="label">'+label+'</div><div class="value">'+val+'</div><div class="delta">'+badge+' '+spark+'</div></div>'}
+var row1=kcard('Active Accounts / wk',kv(K.activeAccounts).thisWeek,K.activeAccounts)+
+  kcard('Active Users / wk',kv(K.activeUsers).thisWeek,K.activeUsers)+
+  kcard('Queries / wk',kv(K.queries).thisWeek.toLocaleString(),K.queries)+
+  kcard('New Accounts',kv(K.newAccounts).thisWeek,K.newAccounts)+
+  kcard('Returning Accounts',kv(K.returningAccounts).thisWeek,K.returningAccounts)+
+  kcard('Queries / Account',kv(K.queriesPerAccount).thisWeek,K.queriesPerAccount);
+var row2='<div class="card north-star"><div class="label">Total External Queries</div><div class="value">'+S.extTotal.toLocaleString()+'</div><div class="delta">'+(S.wowPct!==null?wd+' '+Math.abs(S.wowPct)+'% WoW':'')+'</div></div>'+
+  '<div class="card"><div class="label">Data Requests</div><div class="value">'+(S.extRequests||S.extTotal).toLocaleString()+'</div><div class="delta">tool calls / sends behind the queries</div></div>'+
+  '<div class="card"><div class="label">External Accounts</div><div class="value">'+S.extAccountCount+'</div></div>'+
+  '<div class="card"><div class="label">External Users</div><div class="value">'+S.extUserCount+'</div></div>'+
+  '<div class="card"><div class="label">Claude MCP</div><div class="value">'+S.platforms.claude.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.claudeTW,S.platformWow.claudeLW)+'</div></div>'+
+  '<div class="card"><div class="label">ChatGPT MCP</div><div class="value">'+S.platforms.gpt.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.gptTW,S.platformWow.gptLW)+'</div></div>'+
+  '<div class="card"><div class="label">Web</div><div class="value">'+S.platforms.web.toLocaleString()+'</div><div class="delta">'+wow(S.platformWow.webTW,S.platformWow.webLW)+'</div></div>';
+document.getElementById('sc').innerHTML='<div class="kpi-section-label">This week &middot; trend (6-week)</div><div class="grid">'+row1+'</div><div class="kpi-section-label">All-time scale</div><div class="grid">'+row2+'</div>';
+
+// Top 3 users rolling 7 days
+var top3=D.users.filter(function(u){return!u.internal&&u.last7>0}).sort(function(a,b){return b.last7-a.last7}).slice(0,3);
+if(top3.length){document.getElementById('top3').innerHTML=top3.map(function(u,i){var medal=['🥇','🥈','🥉'][i];return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0'+(i<2?';border-bottom:1px solid var(--border)':'')+'"><span style="font-size:20px">'+medal+'</span><div style="flex:1"><div style="font-weight:600;font-size:14px">'+u.email+' <span class="badge external">'+u.company+'</span></div><div style="font-size:12px;color:var(--text2)">'+u.last7+' queries · last 7 days</div></div></div>'}).join('')}else{document.getElementById('top3box').style.display='none'}
+
+// Top 3 accounts rolling 7 days
+var top3acc=D.accounts.filter(function(a){return!a.internal&&a.last7>0}).sort(function(a,b){return b.last7-a.last7}).slice(0,3);
+if(top3acc.length){document.getElementById('top3acc').innerHTML=top3acc.map(function(a,i){var medal=['🥇','🥈','🥉'][i];return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0'+(i<2?';border-bottom:1px solid var(--border)':'')+'"><span style="font-size:20px">'+medal+'</span><div style="flex:1"><div style="font-weight:600;font-size:14px">'+a.company+' <span class="badge external">'+a.users+(a.users===1?' user':' users')+'</span></div><div style="font-size:12px;color:var(--text2)">'+a.last7+' queries · last 7 days</div></div></div>'}).join('')}else{document.getElementById('top3accbox').style.display='none'}
+
+// Weekly trend chart with cumulative line
+new Chart(document.getElementById('weeklyChart').getContext('2d'),{type:'bar',data:{labels:D.weekly.map(function(w){var d=new Date(w.week+'T00:00:00Z');return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}),datasets:[{label:'Claude MCP',data:D.weekly.map(function(w){return w.mcpClaude}),backgroundColor:'#D97706',stack:'s',order:2},{label:'ChatGPT MCP',data:D.weekly.map(function(w){return w.mcpGpt}),backgroundColor:'#10A37F',stack:'s',order:2},{label:'Web',data:D.weekly.map(function(w){return w.web}),backgroundColor:'#7C3AED',stack:'s',order:2},{label:'Cumulative',data:D.weekly.map(function(w){return w.cumulative}),type:'line',borderColor:'rgba(0,0,0,.3)',backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:'rgba(0,0,0,.4)',yAxisID:'y1',order:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{size:11}}}},scales:{x:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#e5e7eb'},stacked:true},y:{ticks:{color:'#6b7280'},grid:{color:'#e5e7eb'},stacked:true},y1:{position:'right',ticks:{color:'rgba(0,0,0,.3)',font:{size:10}},grid:{display:false}}}}});
+
+// Platform mix — 100% stacked area over weeks
+var pmLabels=D.weekly.map(function(w){var d=new Date(w.week+'T00:00:00Z');return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+var pmTotals=D.weekly.map(function(w){return(w.mcpClaude||0)+(w.mcpGpt||0)+(w.web||0)||1});
+new Chart(document.getElementById('platMixChart').getContext('2d'),{type:'line',data:{labels:pmLabels,datasets:[{label:'Claude MCP',data:D.weekly.map(function(w,i){return Math.round((w.mcpClaude||0)/pmTotals[i]*100)}),backgroundColor:'rgba(217,119,6,.6)',borderColor:'#D97706',fill:true,tension:.3},{label:'ChatGPT MCP',data:D.weekly.map(function(w,i){return Math.round((w.mcpGpt||0)/pmTotals[i]*100)}),backgroundColor:'rgba(16,163,127,.6)',borderColor:'#10A37F',fill:true,tension:.3},{label:'Web',data:D.weekly.map(function(w,i){return Math.round((w.web||0)/pmTotals[i]*100)}),backgroundColor:'rgba(124,58,237,.6)',borderColor:'#7C3AED',fill:true,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{size:11}}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.raw+'%'}}}},scales:{x:{ticks:{color:'#6b7280',font:{size:10}},grid:{color:'#e5e7eb'}},y:{stacked:true,max:100,ticks:{color:'#6b7280',callback:function(v){return v+'%'}},grid:{color:'#e5e7eb'}}}}});
+
+// Account trends with sparklines
+var extAccs=D.accounts.filter(function(a){return!a.internal&&a.total>0});
+var growing=extAccs.filter(function(a){return a.trend==='growing'}).sort(function(a,b){return b.total-a.total});
+var declining=extAccs.filter(function(a){return a.trend==='declining'}).sort(function(a,b){return b.total-a.total});
+var stable=extAccs.filter(function(a){return a.trend==='stable'}).sort(function(a,b){return b.total-a.total});
+function accSparkline(h){var mx=Math.max.apply(null,h)||1;return '<svg width="48" height="16" style="vertical-align:middle">'+h.map(function(v,i){var ht=Math.max(Math.round(v/mx*14),v>0?2:0);return '<rect x="'+(i*8)+'" y="'+(16-ht)+'" width="6" height="'+ht+'" rx="1" fill="'+(i===h.length-1?'var(--accent)':'#cbd5e1')+'" />'}).join('')+'</svg>'}
+function trendRows(items,limit){return items.slice(0,limit||8).map(function(a){return '<div class="trend-item"><span class="trend-name">'+a.company+'</span><span class="trend-spark">'+accSparkline(a.weeklyHistory)+'</span><span class="trend-vals">'+a.total+'</span></div>'}).join('')}
+function trendCol(label,color,items){return '<div class="trend-section"><div class="trend-header"><span class="dot" style="background:'+color+'"></span>'+label+' ('+items.length+')</div>'+(items.length?trendRows(items,10):'<div style="color:var(--text2);font-size:12px;padding:4px 0">None</div>')+'</div>'}
+document.getElementById('accTrends').innerHTML=trendCol('Growing','var(--green)',growing)+trendCol('Declining','var(--red)',declining)+trendCol('Stable','var(--text2)',stable);
+
+new Chart(document.getElementById('dailyChart').getContext('2d'),{type:'bar',data:{labels:D.daily.map(function(d){return d.date.slice(5)}),datasets:[{label:'Claude MCP',data:D.daily.map(function(d){return d.mcpClaude}),backgroundColor:'#D97706',stack:'s'},{label:'ChatGPT MCP',data:D.daily.map(function(d){return d.mcpGpt}),backgroundColor:'#10A37F',stack:'s'},{label:'Web',data:D.daily.map(function(d){return d.web}),backgroundColor:'#7C3AED',stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{size:11}}}},scales:{x:{ticks:{color:'#6b7280',font:{size:10},maxRotation:45},grid:{color:'#e5e7eb'},stacked:true},y:{ticks:{color:'#6b7280'},grid:{color:'#e5e7eb'},stacked:true}}}});
+
+// Tool chart removed from summary — replaced by account trends
+
+// USERS
+function wowBadge(v){if(v===null)return'<span class="delta flat">—</span>';if(v==='new')return'<span class="delta up">new</span>';if(v>0)return'<span class="delta up">\u2191'+v+'%</span>';if(v<0)return'<span class="delta down">\u2193'+Math.abs(v)+'%</span>';return'<span class="delta flat">\u2192 0%</span>'}
+function streakBadge(n){if(!n)return'—';return n+'w'}
+function sparkline(arr){var mx=Math.max.apply(null,arr)||1;return '<svg width="60" height="20" style="vertical-align:middle">'+arr.map(function(v,i){var h=Math.max(Math.round(v/mx*18),v>0?2:0);return '<rect x="'+(i*10+1)+'" y="'+(20-h)+'" width="8" height="'+h+'" rx="1" fill="'+(i===arr.length-1?'var(--accent)':'#cbd5e1')+'" />'}).join('')+'</svg>'}
+var extUsers=D.users.filter(function(u){return!u.internal});
+document.querySelector('#ut2 tbody').innerHTML=extUsers.map(function(u){var laTs=u.lastActive?new Date(u.lastActive).getTime():0;return '<tr><td>'+u.email+' <span class="badge external">'+u.company+'</span></td><td data-sort-value="'+laTs+'">'+fd(u.lastActive)+'</td><td><strong>'+u.thisWeek+'</strong></td><td>'+u.totalActivity.toLocaleString()+'</td><td>'+(u.totalRequests||0).toLocaleString()+'</td><td>'+wowBadge(u.wow)+'</td><td>'+streakBadge(u.streak)+'</td><td>'+sparkline(u.recentWeeks)+'</td><td>'+u.mcpClaude.toLocaleString()+'</td><td>'+u.mcpGpt.toLocaleString()+'</td><td>'+u.web.toLocaleString()+'</td></tr>'}).join('');
+sortTbl(document.getElementById('ut2'));
+
+// ACCOUNTS
+function trendBadge(t){var c=t==='growing'?'var(--green)':t==='declining'?'var(--red)':'var(--text2)';var icon=t==='growing'?'↑':t==='declining'?'↓':'→';return '<span style="color:'+c+';font-weight:600">'+icon+' '+t.charAt(0).toUpperCase()+t.slice(1)+'</span>'}
+function accActive(a){var rw=a.weeklyHistory||[];return rw.length&&rw[rw.length-1]>0}
+// Roster status (a.status from Sheet30) drives the churn label; activity is a separate axis.
+function accStatusCell(a){
+  var active=accActive(a);
+  if(a.status==='live')return active?['var(--green)','Live']:['#9ca3af','Live · dormant'];
+  if(a.status==='off-boarded')return active?['var(--red)','Off-boarded ⚠']:['#9ca3af','Off-boarded'];
+  return active?['#D97706','Unlisted ⚠']:['#9ca3af','Unlisted'];
+}
+// Hide only fully-churned accounts (off-boarded AND no activity). Everything active stays visible.
+var ext=D.accounts.filter(function(a){return!a.internal&&!(a.status==='off-boarded'&&!accActive(a))});
+document.querySelector('#at2 tbody').innerHTML=ext.map(function(a){
+  var sc=accStatusCell(a);
+  var dot='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+sc[0]+'"></span> '+sc[1];
+  var auColor=a.activeUsers>0?'var(--green)':'var(--text2)';
+  var laTs=a.lastActive?new Date(a.lastActive).getTime():0;
+  return '<tr><td>'+dot+'</td><td>'+a.company+'</td><td style="color:'+auColor+';font-weight:600">'+a.activeUsers+'/'+a.users+'</td><td data-sort-value="'+laTs+'">'+fd(a.lastActive)+'</td><td><strong>'+a.thisWeek+'</strong></td><td>'+a.total.toLocaleString()+'</td><td>'+(a.requests||0).toLocaleString()+'</td><td>'+trendBadge(a.trend)+'</td><td>'+sparkline(a.weeklyHistory)+'</td></tr>'
+}).join('');
+sortTbl(document.getElementById('at2'));
+// Attention callout — accounts active this week but not marked live in the roster.
+var attn=D.attention||[];
+if(attn.length){document.getElementById('attnBox').style.display='block';document.getElementById('attnList').innerHTML=attn.map(function(x){return '<div style="padding:3px 0">• <strong>'+x.company+'</strong> ('+x.domain+') — roster: '+x.status+', but '+x.thisWeek+' queries this week across '+x.users+(x.users===1?' user':' users')+'</div>'}).join('')}
+
+
+// GEOGRAPHY
+var mapInit=false,geoMode='#',geoMap=null,geoLayer=null,includeLizo=false;
+function G(){return includeLizo?(D.geoAll||D.geo):D.geo;}
+function setGeoMode(m){geoMode=m;document.getElementById('geoModeNum').classList.toggle('active',m==='#');document.getElementById('geoModePct').classList.toggle('active',m==='%');renderGeoTable()}
+function populateGeoAccts(){
+  var sel=document.getElementById('geoAcctFilter');
+  var prev=sel.value;
+  sel.innerHTML='<option value="">All accounts</option>';
+  (G().accounts||[]).forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o)});
+  if(prev&&(G().accounts||[]).indexOf(prev)>=0)sel.value=prev;
+}
+function toggleLizo(){
+  includeLizo=!includeLizo;
+  document.getElementById('geoLizoToggle').classList.toggle('active',includeLizo);
+  populateGeoAccts();populateGeoUsers();renderGeoTable();renderGeoMap();
+}
+function initMap(){
+  if(mapInit)return;mapInit=true;
+  var map=L.map('map').setView([39.8,-98.5],4);geoMap=map;
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM & Carto',maxZoom:18}).addTo(map);
+  geoLayer=L.layerGroup().addTo(map);
+  populateGeoAccts();
+  populateGeoUsers();
+  renderGeoMap();
+  renderGeoTable();
+}
+function geoUsersFor(acct){
+  var ua=G().userAccount||{};
+  var all=Object.keys(ua);
+  return (acct?all.filter(function(u){return ua[u]===acct}):all).sort();
+}
+function populateGeoUsers(){
+  var acct=document.getElementById('geoAcctFilter').value;
+  var sel=document.getElementById('geoUserFilter');
+  sel.innerHTML='<option value="">All users</option>';
+  geoUsersFor(acct).forEach(function(u){var o=document.createElement('option');o.value=u;o.textContent=u;sel.appendChild(o)});
+}
+function onGeoAcctChange(){populateGeoUsers();renderGeoTable();renderGeoMap();}
+function geoZipCount(z,raw,acct,user){
+  if(user)return (G().zipUser[z]||{})[user]||0;
+  if(acct)return (G().zipAcct[z]||{})[acct]||0;
+  return raw;
+}
+function renderGeoMap(){
+  if(!geoMap||!geoLayer)return;
+  geoLayer.clearLayers();
+  var acct=document.getElementById('geoAcctFilter').value;
+  var user=document.getElementById('geoUserFilter').value;
+  var mData=(G().msas||[]).map(function(m){
+    var cnt=0,zl=[];
+    m.zips.forEach(function(z){
+      var c=(acct||user)?geoZipCount(z[0],z[1],acct,user):z[1];
+      if((acct||user)&&!c)return;
+      cnt+=c;zl.push(z[0]+(z[2]?' '+z[2]:'')+' ('+c+')');
+    });
+    return {name:m.name,lat:m.lat,lng:m.lng,count:cnt,zips:zl};
+  }).filter(function(m){return m.count>0});
+  var maxQ=mData.reduce(function(mx,m){return Math.max(mx,m.count)},1);
+  mData.forEach(function(m){
+    var r=Math.min(Math.max(Math.sqrt(m.count/maxQ)*30,6),35);
+    var col=m.count>100?'#581c87':m.count>50?'#7C3AED':m.count>10?'#A78BFA':'#DDD6FE';
+    L.circleMarker([m.lat,m.lng],{radius:r,color:col,fillColor:col,fillOpacity:.6,weight:2}).addTo(geoLayer)
+      .bindPopup('<b>'+m.name+'</b><br>'+m.count+' queries<br><small>'+m.zips.length+' ZIPs</small><hr style="margin:4px 0"><small>'+m.zips.join('<br>')+'</small>');
+  });
+  (D.assetInterest||[]).forEach(function(a){
+    if(!a.lat||!a.lng)return;
+    if(user){if(!a.users.some(function(u){return u.email===user}))return;}
+    else if(acct){if(!a.users.some(function(u){return u.company===acct}))return;}
+    var userNames=a.users.map(function(u){return u.email}).join(', ');
+    var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+    L.marker([a.lat,a.lng],{icon:icon}).addTo(geoLayer)
+      .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
+  });
+}
+function renderGeoTable(){
+  var acct=document.getElementById('geoAcctFilter').value;
+  var user=document.getElementById('geoUserFilter').value;
+  var msas=G().msas;
+  var wks=G().weeks||[];
+  var zipAcct=G().zipAcct||{};
+  var filtered=[];
+  var weekTotals=wks.map(function(){return 0});
+  var grandTotal=0;
+  msas.forEach(function(m){
+    var fzips=[];
+    var mTotal=0,mWeekly=wks.map(function(){return 0});
+    var acctSet={};
+    m.zips.forEach(function(z){
+      var zipCode=z[0],cnt=z[1],city=z[2],zwk=z[3]||[];
+      if(acct||user){
+        var fc=geoZipCount(zipCode,cnt,acct,user);
+        if(fc===0)return;
+        cnt=fc;
+      }
+      var za=zipAcct[zipCode]||{};
+      Object.keys(za).forEach(function(a){if(!acct||a===acct)acctSet[a]=1});
+      mTotal+=cnt;
+      var fzwk=zwk.slice();
+      for(var i=0;i<wks.length;i++){mWeekly[i]+=fzwk[i]||0}
+      fzips.push([zipCode,cnt,city,fzwk]);
+    });
+    if(mTotal>0){
+      fzips.sort(function(a,b){return b[1]-a[1]});
+      filtered.push({name:m.name,count:mTotal,weekly:mWeekly,zips:fzips,nAcct:Object.keys(acctSet).length});
+      grandTotal+=mTotal;
+      for(var i=0;i<wks.length;i++)weekTotals[i]+=mWeekly[i];
+    }
+  });
+  filtered.sort(function(a,b){return b.nAcct-a.nAcct||b.count-a.count});
+  var isPct=geoMode==='%';
+  var wkHd=wks.map(function(w){return '<th class="num">'+w.slice(5)+'</th>'}).join('');
+  document.getElementById('geoHead').innerHTML='<tr><th>Market</th><th class="num">Accounts</th><th class="num">Total</th>'+wkHd+'</tr>';
+  var rows='';
+  function fmt(v,total){if(isPct){return total>0?(v/total*100).toFixed(1)+'%':'0%'}return v}
+  filtered.forEach(function(m,mi){
+    var mwk=m.weekly.map(function(v,i){return '<td class="num">'+fmt(v,weekTotals[i])+'</td>'}).join('');
+    rows+='<tr class="msa-row" data-msa="'+mi+'"><td><span class="arrow">▶</span>'+m.name+'</td><td class="num" style="font-weight:600">'+m.nAcct+'</td><td class="num" style="color:var(--accent);font-weight:700">'+fmt(m.count,grandTotal)+'</td>'+mwk+'</tr>';
+    m.zips.forEach(function(z){
+      var city=z[2]||'';
+      var zwk=(z[3]||[]).map(function(v,i){return '<td class="num">'+(v?fmt(v,weekTotals[i]):'')+'</td>'}).join('');
+      rows+='<tr class="zip-row" data-msa="'+mi+'"><td>'+z[0]+(city?' <span style="color:var(--text2);font-size:11px">'+city+'</span>':'')+'</td><td class="num"></td><td class="num">'+fmt(z[1],grandTotal)+'</td>'+zwk+'</tr>';
+    });
+  });
+  document.getElementById('geoBody').innerHTML=rows;
+  document.querySelectorAll('.geo-table .msa-row').forEach(function(r){
+    r.addEventListener('click',function(){
+      var open=r.classList.toggle('open');
+      var mi=r.dataset.msa;
+      var zrs=document.querySelectorAll('.geo-table .zip-row[data-msa="'+mi+'"]');
+      zrs.forEach(function(zr){zr.style.display=open?'table-row':'none'});
+    });
+  });
+}
+
+// FEATURE ADOPTION — grouped by feature, users inside each bar
+var faChart=null,faPeriod='30d';
+var faColors={ask_lizo:'#7C3AED',assets:'#10A37F',pipeline:'#D97706',library:'#3B82F6',reports:'#EC4899',onboarding:'#64748B',gmail:'#EA4335',teasers:'#F59E0B',tarlist:'#06B6D4'};
+var faLabels={ask_lizo:'Ask lizo',assets:'Assets',pipeline:'Pipeline',library:'Location Analysis',reports:'Research Tools',onboarding:'Onboarding',gmail:'Gmail',teasers:'Teasers',tarlist:'Target Lists'};
+var faKeys=['ask_lizo','assets','pipeline','library','reports','onboarding','gmail','teasers','tarlist'];
+var TOOL_LABELS={location_analysis:'Location analysis',find_asset:'Find asset',get_asset_data:'Asset data',compare_zip_code:'Compare ZIPs',zip_code_vs_msa:'ZIP vs MSA',find_zip_code:'Find ZIP',get_zip_code_data:'ZIP data',compare_msa:'Compare MSA',find_msa:'Find MSA',compare_rents_data:'Rents compare',asset_snapshot_with_zip_avg:'Asset snapshot'};
+function setFaPeriod(p){faPeriod=p;document.getElementById('fa7d').classList.toggle('active',p==='7d');document.getElementById('fa30d').classList.toggle('active',p==='30d');renderFaChart()}
+function renderFaChart(){
+  var data=D.featureAdoption[faPeriod]||[];
+  if(!data.length){document.getElementById('faChart').parentElement.style.display='none';return}
+  var userColors=['#7C3AED','#10A37F','#D97706','#3B82F6','#EC4899','#F59E0B','#EF4444','#06B6D4','#8B5CF6','#14B8A6','#F43F5E','#A855F7'];
+  var labels=faKeys.map(function(k){return faLabels[k]});
+  var datasets=data.map(function(u,i){return{label:u.email,data:faKeys.map(function(k){return u[k]||0}),backgroundColor:userColors[i%userColors.length]}});
+  if(faChart)faChart.destroy();
+  faChart=new Chart(document.getElementById('faChart').getContext('2d'),{type:'bar',data:{labels:labels,datasets:datasets},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b7280',font:{size:11}},position:'bottom'},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.raw+' pageviews'}}}},scales:{x:{stacked:true,ticks:{color:'#6b7280'},grid:{color:'#e5e7eb'}},y:{stacked:true,ticks:{color:'#6b7280',font:{size:12,weight:'600'}},grid:{display:false}}}}});
+  var el=document.getElementById('faChart');el.parentElement.style.minHeight=Math.max(250,5*50+80)+'px';el.style.minHeight=Math.max(200,5*50+60)+'px';
+}
+renderFaChart();
+
+// ASSET INTEREST TABLE + MAP PINS
+var assetsInit=false,assetMapObj=null,assetPinLayer=null,assetMarkersById={};
+function highlightAsset(i){
+  var m=assetMarkersById[i];
+  if(!m||!assetMapObj)return;
+  assetMapObj.setView(m.getLatLng(),12,{animate:true});
+  m.openPopup();
+  document.getElementById('assetMap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function assetAcctList(){
+  var s={};(D.assetInterest||[]).forEach(function(a){a.users.forEach(function(u){if(u.company)s[u.company]=1})});
+  return Object.keys(s).sort();
+}
+function assetUsersFor(acct){
+  var s={};(D.assetInterest||[]).forEach(function(a){a.users.forEach(function(u){if(!acct||u.company===acct)s[u.email]=1})});
+  return Object.keys(s).sort();
+}
+function populateAssetUsers(){
+  var acct=document.getElementById('assetAcctFilter').value;
+  var sel=document.getElementById('assetUserFilter');
+  sel.innerHTML='<option value="">All users</option>';
+  assetUsersFor(acct).forEach(function(e){var o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o)});
+}
+function onAssetAcctChange(){populateAssetUsers();renderAssetTable();renderAssetPins();}
+function assetPasses(a,acct,user){
+  if(acct&&!a.users.some(function(u){return u.company===acct}))return false;
+  if(user&&!a.users.some(function(u){return u.email===user}))return false;
+  return true;
+}
+function assetUserSubset(a,acct,user){
+  if(user)return a.users.filter(function(u){return u.email===user});
+  if(acct)return a.users.filter(function(u){return u.company===acct});
+  return a.users;
+}
+function initAssets(){
+  if(assetsInit)return;assetsInit=true;
+  var assets=D.assetInterest||[];
+  assets.forEach(function(a,i){a._i=i});
+  var asel=document.getElementById('assetAcctFilter');
+  assetAcctList().forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;asel.appendChild(o)});
+  populateAssetUsers();
+  assetMapObj=L.map('assetMap').setView([39.8,-98.5],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM & Carto',maxZoom:18}).addTo(assetMapObj);
+  assetPinLayer=L.layerGroup().addTo(assetMapObj);
+  renderAssetPins();
+  renderAssetTable();
+}
+function renderAssetPins(){
+  if(!assetMapObj||!assetPinLayer)return;
+  assetPinLayer.clearLayers();assetMarkersById={};
+  var acct=document.getElementById('assetAcctFilter').value;
+  var user=document.getElementById('assetUserFilter').value;
+  var assets=(D.assetInterest||[]).filter(function(a){return a.lat&&a.lng&&assetPasses(a,acct,user);});
+  var bounds=[];
+  for(var i=0;i<assets.length;i++){
+    var a=assets[i];
+    var userNames=assetUserSubset(a,acct,user).map(function(u){return u.email}).join(', ');
+    var icon=L.divIcon({className:'',html:'<div style="background:#EF4444;width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>',iconSize:[14,14],iconAnchor:[7,7]});
+    var mk=L.marker([a.lat,a.lng],{icon:icon}).addTo(assetPinLayer)
+      .bindPopup('<b>'+(a.name||'Asset')+'</b>'+(a.address?'<br><small>'+a.address+'</small>':'')+'<br>'+a.count+' analyses<br><small>'+userNames+'</small>');
+    assetMarkersById[a._i]=mk;
+    bounds.push([a.lat,a.lng]);
+  }
+  if(bounds.length>1)assetMapObj.fitBounds(bounds,{padding:[30,30]});
+  else if(bounds.length===1)assetMapObj.setView(bounds[0],8);
+}
+function renderAssetTable(){
+  var acct=document.getElementById('assetAcctFilter').value;
+  var user=document.getElementById('assetUserFilter').value;
+  var active=acct||user;
+  var assets=(D.assetInterest||[]).filter(function(a){return assetPasses(a,acct,user);});
+  document.getElementById('assetCount').textContent=assets.length+' asset'+(assets.length!==1?'s':'');
+  if(!assets.length){document.getElementById('assetBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No asset-level data'+(active?' for this filter':'')+'</td></tr>';return}
+  document.getElementById('assetBody').innerHTML=assets.map(function(a){
+    var filteredUsers=assetUserSubset(a,acct,user);
+    var userList=filteredUsers.map(function(u){return u.email+(u.company?' <span class="badge external">'+u.company+'</span>':'')}).join(', ');
+    var srcBadges=a.sources.map(function(s){return '<span class="badge '+(s==='web'?'internal':'external')+'">'+s+'</span>'}).join(' ');
+    var cnt=active?filteredUsers.reduce(function(s,u){return s+u.count},0):a.count;
+    var ls=a.lastSeen?new Date(a.lastSeen).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+    var lsTs=a.lastSeen?new Date(a.lastSeen).getTime():0;
+    var nf=a.found===false?' <span class="badge" style="background:#fde68a;color:#92400e">not in DB</span>':'';
+    var clk=(a.lat&&a.lng)?' onclick="highlightAsset('+a._i+')" style="cursor:pointer"':'';
+    return '<tr'+clk+'><td><strong>'+(a.name||'—')+'</strong>'+nf+'</td><td class="query-text" style="max-width:250px">'+(a.address||'—')+'</td><td>'+userList+'</td><td><strong>'+cnt+'</strong></td><td data-sort-value="'+lsTs+'" style="white-space:nowrap;color:var(--text2)">'+ls+'</td><td>'+srcBadges+'</td></tr>';
+  }).join('');
+  sortTbl(document.getElementById('assetTable'));
+}
+
+// QUERIES TAB
+var queriesInit=false;
+function initQueries(){
+  if(queriesInit)return;queriesInit=true;
+  var queries=D.queryLog||[];
+  var userSet={};
+  queries.forEach(function(q){if(q.user)userSet[q.user]=1});
+  var sel=document.getElementById('queryUserFilter');
+  Object.keys(userSet).sort().forEach(function(e){var o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o)});
+  renderQueryTable();
+}
+function renderQueryTable(){
+  var userF=document.getElementById('queryUserFilter').value;
+  var srcF=document.getElementById('querySourceFilter').value;
+  var queries=(D.queryLog||[]).filter(function(q){
+    if(userF&&q.user!==userF)return false;
+    if(srcF&&q.source!==srcF)return false;
+    return true;
+  });
+  document.getElementById('queryCount').textContent=queries.length+' data request'+(queries.length!==1?'s':'')+' (one row per MCP tool call or web send)';
+  if(!queries.length){document.getElementById('queryBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No data requests found</td></tr>';return}
+  document.getElementById('queryBody').innerHTML=queries.map(function(q){
+    var srcBadge='<span class="badge '+(q.source==='Web'?'internal':'external')+'">'+q.source+'</span>';
+    var toolInfo=q.tool?(TOOL_LABELS[q.tool]||q.tool):(q.source==='Web'?'Web query':'—');
+    var stBadge=q.status==='success'?'<span class="badge success">OK</span>':(q.status?'<span class="badge error">'+q.status+'</span>':'—');
+    var ts=q.time?new Date(q.time).getTime():0;
+    return '<tr><td>'+q.user+'</td><td class="query-text" style="max-width:350px" title="'+(q.query||'').replace(/"/g,'&quot;')+'">'+(q.query||'—')+'</td><td>'+toolInfo+'</td><td>'+srcBadge+'</td><td data-sort-value="'+ts+'">'+fdt(q.time)+'</td><td>'+stBadge+'</td></tr>';
+  }).join('');
+  sortTbl(document.getElementById('queryTable'));
+}
+
+// ACTIVITY TAB
+var activityInit=false,actView='sessions';
+function initActivity(){
+  if(activityInit)return;activityInit=true;
+  var sessions=D.activityLog||[];
+  var userSet={};
+  sessions.forEach(function(s){if(s.user)userSet[s.user]=1});
+  var sel=document.getElementById('actUserFilter');
+  Object.keys(userSet).sort().forEach(function(e){var o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o)});
+  renderActivity();
+}
+function setActView(v){actView=v;document.getElementById('actViewSess').classList.toggle('active',v==='sessions');document.getElementById('actViewFlat').classList.toggle('active',v==='flat');renderActivity();}
+function renderActivity(){
+  var userF=document.getElementById('actUserFilter').value;
+  var sessions=(D.activityLog||[]).filter(function(s){return !userF||s.user===userF});
+  var head=document.getElementById('actHead'),body=document.getElementById('actBody');
+  if(actView==='flat'){
+    head.innerHTML='<tr><th>User</th><th>Company</th><th>Action</th><th>Detail</th><th>Time</th></tr>';
+    var rows=[];
+    sessions.forEach(function(s){s.actions.forEach(function(a){rows.push({user:s.user,company:s.company,name:a.name,detail:a.detail,time:a.time})})});
+    rows.sort(function(a,b){return String(b.time||'').localeCompare(String(a.time||''))});
+    document.getElementById('actCount').textContent=rows.length+' event'+(rows.length!==1?'s':'');
+    if(!rows.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text2)">No activity found</td></tr>';return}
+    body.innerHTML=rows.map(function(r){var ts=r.time?new Date(r.time).getTime():0;return '<tr><td>'+r.user+'</td><td>'+(r.company||'—')+'</td><td>'+r.name+'</td><td style="color:var(--text2);font-size:11px">'+(r.detail||'')+'</td><td data-sort-value="'+ts+'">'+fdt(r.time)+'</td></tr>'}).join('');
+    sortTbl(document.getElementById('actTable'));
+  } else {
+    head.innerHTML='<tr><th>User</th><th>Company</th><th>Session start</th><th>Duration</th><th># actions</th><th>Flow</th></tr>';
+    document.getElementById('actCount').textContent=sessions.length+' session'+(sessions.length!==1?'s':'');
+    if(!sessions.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No sessions found</td></tr>';return}
+    body.innerHTML=sessions.map(function(s,i){
+      var ts=s.start?new Date(s.start).getTime():0;
+      var dur=s.durationMin>0?s.durationMin+'m':'<1m';
+      var steps=s.actions.map(function(a){return '<div style="padding:2px 0;font-size:12px"><span style="color:var(--text2)">'+fdt(a.time)+'</span> — '+a.name+(a.detail?' <span style="color:var(--text2);font-size:11px">'+a.detail+'</span>':'')+'</div>'}).join('');
+      return '<tr style="cursor:pointer" onclick="toggleSess('+i+')"><td>'+s.user+'</td><td>'+(s.company||'—')+'</td>'+
+        '<td data-sort-value="'+ts+'">'+fdt(s.start)+'</td>'+
+        '<td data-sort-value="'+s.durationMin+'">'+dur+'</td>'+
+        '<td>'+s.count+'</td>'+
+        '<td class="query-text" style="max-width:380px">'+s.flowPreview+
+          '<div id="sess'+i+'" style="display:none;margin-top:6px;border-top:1px solid var(--border);padding-top:6px">'+steps+'</div>'+
+        '</td></tr>';
+    }).join('');
+    sortTbl(document.getElementById('actTable'));
+  }
+}
+function toggleSess(i){var r=document.getElementById('sess'+i);if(r)r.style.display=r.style.display==='none'?'':'none';}
+
+var engInit=false;
+function initEngagement(){if(engInit)return;engInit=true;renderEngagement();}
+function engEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function engSpark(arr,max,leaders,labels){
+  var cols=arr.map(function(v,i){
+    var lbl=(labels&&labels[i])||'';
+    if(v==null)return '<span class="wkc na" title="'+lbl+': no data"><i style="height:0%"></i><em>·</em></span>';
+    var isLead=v>0&&leaders&&leaders[i]!=null&&v===leaders[i];
+    var h=v>0?Math.max(Math.round(v/(max||1)*100),8):0;
+    var cls=isLead?'wkc lead':(i===arr.length-1?'wkc last':'wkc');
+    var ttl=lbl+': '+v+(isLead?' — weekly leader':'');
+    return '<span class="'+cls+'" title="'+ttl+'"><i style="height:'+h+'%"></i><em>'+v+'</em></span>';
+  }).join('');
+  return '<span class="mspark">'+cols+'</span>';
+}
+function engTw(arr){var v=arr[arr.length-1];return v==null?0:v;}
+function engBar(val,max,cls){var w=max?Math.round(val/max*100):0;return '<div class="ebarwrap"><div class="ebar '+cls+'" style="width:'+w+'%"></div><span>'+val+'</span></div>';}
+function engCell(headline,spark){return '<div class="mcell"><b class="mnum">'+headline+'</b>'+spark+'</div>';}
+function engUsr(email,company){return '<td class="eng-usr">'+engEsc(email)+'<div class="eco">'+engEsc(company||'')+'</div></td>';}
+function renderEngagement(){
+  var E=D.engagement;
+  var note=document.getElementById('engNote');
+  if(!E){if(note)note.innerHTML='<strong>No engagement data.</strong>';return;}
+  var range=new Date(E.rollStart).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})+'–'+new Date(E.rollEnd).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});
+  var wkHdr=E.weeks.map(function(w){return w.label}).join(' · ');
+  var webStart=new Date(E.webStart).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});
+  if(note)note.innerHTML='<strong>The bar is 7-day rolling; the columns are this week.</strong> The horizontal bar is each user\'s rolling 7d total (web = minutes, MCP = tool calls) — the real number is printed, the bar drawn as a % of the top user. The metric columns show <strong>this calendar week\'s</strong> value with a 5-week sparkline behind it (each scaled to its own weekly max). A weekly bar turns gold when it led a week with 2+ active users.<div style="font-size:12px;color:var(--text2);margin-top:8px">External users · rolling 7d '+range+' · weekly trend '+wkHdr+' (Mon-start). Web logging began '+webStart+'.</div>';
+  var EW=E.weeks.map(function(w){return w.label});
+  var W=E.web,wt='';
+  W.rows.forEach(function(r,i){
+    wt+='<tr><td class="eng-rk">'+(i+1)+'</td>'+engUsr(r.email,r.company)+
+      '<td>'+engBar(r.rollMin,W.rollMax,'web')+'</td>'+
+      '<td>'+engCell(engTw(r.mMin),engSpark(r.mMin,W.minMax,W.leadMin,EW))+'</td>'+
+      '<td>'+engCell(engTw(r.mSess),engSpark(r.mSess,W.sessMax,W.leadSess,EW))+'</td>'+
+      '<td>'+engCell(engTw(r.mAct),engSpark(r.mAct,W.actMax,W.leadAct,EW))+'</td></tr>';
+  });
+  document.getElementById('engWeb').innerHTML='<div class="table-wrap"><h3 class="eng-h"><span class="edot web"></span>Web <span class="esub">— '+W.rows.length+' users, ranked by 7d rolling minutes</span></h3><table><thead><tr><th>#</th><th>User</th><th>Minutes · 7d rolling</th><th>Minutes · this wk</th><th>Sessions · this wk</th><th>Actions · this wk</th></tr></thead><tbody>'+(wt||'<tr><td colspan="6" style="text-align:center;color:var(--text2)">No web activity</td></tr>')+'</tbody></table></div>';
+  var M=E.mcp,mt='';
+  M.rows.forEach(function(r,i){
+    mt+='<tr><td class="eng-rk">'+(i+1)+'</td>'+engUsr(r.email,r.company)+
+      '<td>'+engBar(r.rollCalls,M.rollMax,'mcp')+'</td>'+
+      '<td>'+engCell(engTw(r.mCall),engSpark(r.mCall,M.callMax,M.leadCall,EW))+'</td></tr>';
+  });
+  document.getElementById('engMcp').innerHTML='<div class="table-wrap"><h3 class="eng-h"><span class="edot mcp"></span>MCP <span class="esub">— '+M.rows.length+' users, ranked by 7d rolling calls</span></h3><table><thead><tr><th>#</th><th>User</th><th>Calls · 7d rolling</th><th>Calls · this wk</th></tr></thead><tbody>'+(mt||'<tr><td colspan="4" style="text-align:center;color:var(--text2)">No MCP activity</td></tr>')+'</tbody></table></div>';
+}
+
+// Expose handlers referenced by inline on* attributes (IIFE scope -> global).
+window.setFaPeriod=setFaPeriod;window.setGeoMode=setGeoMode;window.toggleLizo=toggleLizo;window.renderGeoTable=renderGeoTable;window.renderGeoMap=renderGeoMap;window.onGeoAcctChange=onGeoAcctChange;window.renderAssetTable=renderAssetTable;window.renderAssetPins=renderAssetPins;window.onAssetAcctChange=onAssetAcctChange;window.highlightAsset=highlightAsset;window.renderQueryTable=renderQueryTable;
+window.setActView=setActView;window.renderActivity=renderActivity;window.toggleSess=toggleSess;
+})();
+</script>
+</body>
+</html>
