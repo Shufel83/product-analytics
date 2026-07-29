@@ -44,13 +44,115 @@
   <h1>Engagement ranking</h1>
   <p class="sub">External users · rolling 7d headline (Jul 21–Jul 28) · weekly trend Jun 29 · Jul 6 · Jul 13 · Jul 20 · Jul 27 (Mon-start) · anchored to 2026-07-28. Web logging began Jul 2.</p>
   <div class="tabs">
-    <button class="tabbtn on" onclick="showTab('raw',this)">Per surface (raw)</button>
+    <button class="tabbtn on" onclick="showTab('lean',this)">Minutes / calls</button>
+    <button class="tabbtn" onclick="showTab('raw',this)">+ session weight</button>
     <button class="tabbtn" onclick="showTab('b',this)">B · vs typical user</button>
     <button class="tabbtn" onclick="showTab('a',this)">A · vs top peer</button>
   </div>
 
-  <div id="praw" class="panel on">
-    <div class="note"><b>Per surface — real units, no cross-surface score.</b> Web and MCP are different things, so they sit in separate sections and bars scale to each section's own max (so lengths are actually proportional). <b>Web engagement</b> = minutes + 5×sessions — a soft nudge so someone who returns often ranks above an equal-minutes one-sitting user, without letting session count take over. <b>MCP</b> = raw tool calls. Weekly-trend numbers are the real values; the rightmost (blue) bar is the most recent week.</div>
+  <div id="plean" class="panel on">
+    <div class="note"><b>Minutes for web, tool calls for MCP. Nothing normalized, nothing weighted.</b> One honest signal per surface: how long someone spent in the product (web) and how many tool calls they ran (MCP). Bars scale to each section's own max so lengths are proportional. Weekly-trend numbers are the real values; the rightmost (blue) bar is the most recent week.</div>
+    <h2 class="sec"><span class="dot web"></span>Web <span class="secn">— 13 users, ranked by minutes</span></h2>
+    <table><thead><tr><th>#</th><th>User</th><th>Minutes (7d)</th><th>Weekly trend</th></tr></thead><tbody><tr>
+      <td class="rk">1</td>
+      <td class="usr">miamibeverly1993@gmail.com<div class="co">gmail.com</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:100%"></div><span>121</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 62"><i style="height:27%"></i><em>62</em></span><span class="wkc" title="Jul 20: 68"><i style="height:30%"></i><em>68</em></span><span class="wkc last" title="Jul 27: 92"><i style="height:40%"></i><em>92</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">2</td>
+      <td class="usr">kyle@domos.us<div class="co">Domos</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:55%"></div><span>66</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 66"><i style="height:29%"></i><em>66</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">3</td>
+      <td class="usr">yoel@aminimholdings.com<div class="co">Aminim Properties</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:31%"></div><span>38</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 38"><i style="height:17%"></i><em>38</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">4</td>
+      <td class="usr">alita@prizmainvestments.com<div class="co">Prizma</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:28%"></div><span>34</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 82"><i style="height:36%"></i><em>82</em></span><span class="wkc last" title="Jul 27: 34"><i style="height:15%"></i><em>34</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">5</td>
+      <td class="usr">stuart@prizmacapital.com<div class="co">Prizma</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:19%"></div><span>23</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 53"><i style="height:23%"></i><em>53</em></span><span class="wkc last" title="Jul 27: 17"><i style="height:7%"></i><em>17</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">6</td>
+      <td class="usr">uriya@ere.co.il<div class="co">ere.co.il</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:9%"></div><span>11</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 11"><i style="height:5%"></i><em>11</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">7</td>
+      <td class="usr">dov@lobodaproperties.com<div class="co">Loboda Properties</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 54"><i style="height:24%"></i><em>54</em></span><span class="wkc" title="Jul 13: 32"><i style="height:14%"></i><em>32</em></span><span class="wkc" title="Jul 20: 22"><i style="height:10%"></i><em>22</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">8</td>
+      <td class="usr">zach@prizmacapital.com<div class="co">prizmacapital.com</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 1"><i style="height:4%"></i><em>1</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">9</td>
+      <td class="usr">isaac@carltonbehr.com<div class="co">Carlton-Behr Capital</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 84"><i style="height:37%"></i><em>84</em></span><span class="wkc" title="Jul 13: 228"><i style="height:100%"></i><em>228</em></span><span class="wkc" title="Jul 20: 34"><i style="height:15%"></i><em>34</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">10</td>
+      <td class="usr">amit@ere.co.il<div class="co">Electra Real Estate</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 76"><i style="height:33%"></i><em>76</em></span><span class="wkc" title="Jul 13: 1"><i style="height:4%"></i><em>1</em></span><span class="wkc" title="Jul 20: 24"><i style="height:11%"></i><em>24</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">11</td>
+      <td class="usr">gilblass@saderealestate.com<div class="co">SADE Real Estate</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 29"><i style="height:13%"></i><em>29</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">12</td>
+      <td class="usr">tomerp@ere.co.il<div class="co">Electra Real Estate</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 22"><i style="height:10%"></i><em>22</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">13</td>
+      <td class="usr">Sandra.Gurrola@affiniuscapital.com<div class="co">affiniuscapital.com</div></td>
+      <td><div class="barwrap"><div class="bar web" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 2"><i style="height:4%"></i><em>2</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr></tbody></table><h2 class="sec"><span class="dot MCP"></span>MCP <span class="secn">— 3 users, ranked by tool calls</span></h2>
+    <table><thead><tr><th>#</th><th>User</th><th>Tool calls (7d)</th><th>Weekly trend</th></tr></thead><tbody><tr>
+      <td class="rk">1</td>
+      <td class="usr">jim.oates@reichardcapital.com<div class="co">Reichard Capital</div></td>
+      <td><div class="barwrap"><div class="bar MCP" style="width:100%"></div><span>12</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 318"><i style="height:100%"></i><em>318</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 12"><i style="height:4%"></i><em>12</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">2</td>
+      <td class="usr">teddy.abdelmalek@hhredstone.com<div class="co">HH Red Stone</div></td>
+      <td><div class="barwrap"><div class="bar MCP" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 1"><i style="height:4%"></i><em>1</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 2"><i style="height:4%"></i><em>2</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr>
+<tr>
+      <td class="rk">3</td>
+      <td class="usr">marc@prizmainvestments.com<div class="co">Prizma</div></td>
+      <td><div class="barwrap"><div class="bar MCP" style="width:0%"></div><span>0</span></div></td>
+      <td class="wk"><span class="wkc" title="Jun 29: 4"><i style="height:4%"></i><em>4</em></span><span class="wkc" title="Jul 6: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 13: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc" title="Jul 20: 0"><i style="height:0%"></i><em>0</em></span><span class="wkc last" title="Jul 27: 0"><i style="height:0%"></i><em>0</em></span></td>
+    </tr></tbody></table>
+  </div>
+
+  <div id="praw" class="panel">
+    <div class="note"><b>Same as the first tab, plus a soft session nudge.</b> <b>Web engagement</b> = minutes + 5×sessions, so someone who returns often edges an equal-minutes one-sitting user. Adds depth (sessions, actions) and all-time Q columns. <b>MCP</b> = raw tool calls. Kept for comparison.</div>
     <h2 class="sec"><span class="dot web"></span>Web <span class="secn">— 13 users, ranked by Engagement</span></h2>
     <table><thead><tr><th>#</th><th>User</th><th>Engagement (7d)</th><th>Depth (7d)</th><th>Weekly trend</th><th>Q (all-time)</th></tr></thead><tbody><tr>
       <td class="rk">1</td>
@@ -221,7 +323,7 @@
 </div>
 <script>
 function showTab(t,btn){
-  ['raw','a','b'].forEach(x=>document.getElementById('p'+x).classList.toggle('on',x===t));
+  ['lean','raw','a','b'].forEach(x=>document.getElementById('p'+x).classList.toggle('on',x===t));
   document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
 }
