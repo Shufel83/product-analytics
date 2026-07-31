@@ -946,16 +946,6 @@
           "mult": 1
         },
         {
-          "name": "Ohad",
-          "score": 14.3,
-          "sessions": 8,
-          "bugs": 1,
-          "webSessions": 7,
-          "mcpSessions": 1,
-          "gptSessions": 0,
-          "mult": 1.17
-        },
-        {
           "name": "Eden",
           "score": 9.3,
           "sessions": 8,
@@ -964,36 +954,6 @@
           "mcpSessions": 1,
           "gptSessions": 0,
           "mult": 1.17
-        },
-        {
-          "name": "Elena",
-          "score": 6.3,
-          "sessions": 5,
-          "bugs": 0,
-          "webSessions": 4,
-          "mcpSessions": 1,
-          "gptSessions": 0,
-          "mult": 1.25
-        },
-        {
-          "name": "Meitar",
-          "score": 5,
-          "sessions": 5,
-          "bugs": 0,
-          "webSessions": 5,
-          "mcpSessions": 0,
-          "gptSessions": 0,
-          "mult": 1
-        },
-        {
-          "name": "Max",
-          "score": 5,
-          "sessions": 5,
-          "bugs": 0,
-          "webSessions": 5,
-          "mcpSessions": 0,
-          "gptSessions": 0,
-          "mult": 1
         },
         {
           "name": "Dor",
@@ -1006,11 +966,41 @@
           "mult": 1
         },
         {
+          "name": "Elena",
+          "score": 6.3,
+          "sessions": 5,
+          "bugs": 0,
+          "webSessions": 4,
+          "mcpSessions": 1,
+          "gptSessions": 0,
+          "mult": 1.25
+        },
+        {
+          "name": "Ohad",
+          "score": 14.3,
+          "sessions": 8,
+          "bugs": 1,
+          "webSessions": 7,
+          "mcpSessions": 1,
+          "gptSessions": 0,
+          "mult": 1.17
+        },
+        {
           "name": "Sveto",
           "score": 0,
           "sessions": 0,
           "bugs": 0,
           "webSessions": 0,
+          "mcpSessions": 0,
+          "gptSessions": 0,
+          "mult": 1
+        },
+        {
+          "name": "Meitar",
+          "score": 5,
+          "sessions": 5,
+          "bugs": 0,
+          "webSessions": 5,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
@@ -1031,6 +1021,16 @@
           "sessions": 0,
           "bugs": 0,
           "webSessions": 0,
+          "mcpSessions": 0,
+          "gptSessions": 0,
+          "mult": 1
+        },
+        {
+          "name": "Max",
+          "score": 5,
+          "sessions": 5,
+          "bugs": 0,
+          "webSessions": 5,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
