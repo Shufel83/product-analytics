@@ -1151,37 +1151,37 @@
       "start": "2026-08-03",
       "end": "2026-08-09",
       "benchmark": {
-        "score": 10.5,
-        "sessions": 7,
-        "days": 1
+        "score": 20,
+        "sessions": 15,
+        "days": 3
       },
       "players": [
         {
           "name": "Omer",
-          "score": 9,
-          "sessions": 9,
+          "score": 15,
+          "sessions": 15,
           "bugs": 0,
-          "webSessions": 9,
+          "webSessions": 15,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
         },
         {
           "name": "Oleg",
-          "score": 5,
-          "sessions": 5,
+          "score": 7,
+          "sessions": 7,
           "bugs": 0,
-          "webSessions": 5,
+          "webSessions": 7,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
         },
         {
           "name": "Eden",
-          "score": 5,
-          "sessions": 4,
+          "score": 7.5,
+          "sessions": 6,
           "bugs": 0,
-          "webSessions": 3,
+          "webSessions": 5,
           "mcpSessions": 1,
           "gptSessions": 0,
           "mult": 1.25
@@ -1198,10 +1198,10 @@
         },
         {
           "name": "Elena",
-          "score": 1,
-          "sessions": 1,
+          "score": 4,
+          "sessions": 4,
           "bugs": 0,
-          "webSessions": 1,
+          "webSessions": 4,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
@@ -1218,20 +1218,20 @@
         },
         {
           "name": "Sveto",
-          "score": 0,
-          "sessions": 0,
+          "score": 1,
+          "sessions": 1,
           "bugs": 0,
-          "webSessions": 0,
+          "webSessions": 1,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
         },
         {
           "name": "Meitar",
-          "score": 2,
-          "sessions": 2,
+          "score": 3,
+          "sessions": 3,
           "bugs": 0,
-          "webSessions": 2,
+          "webSessions": 3,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
@@ -1258,10 +1258,10 @@
         },
         {
           "name": "Max",
-          "score": 2,
-          "sessions": 2,
+          "score": 7,
+          "sessions": 7,
           "bugs": 0,
-          "webSessions": 2,
+          "webSessions": 7,
           "mcpSessions": 0,
           "gptSessions": 0,
           "mult": 1
@@ -1278,24 +1278,24 @@
         },
         {
           "name": "Shuf",
-          "score": 1,
-          "sessions": 1,
+          "score": 3,
+          "sessions": 3,
           "bugs": 0,
           "webSessions": 0,
-          "mcpSessions": 1,
+          "mcpSessions": 3,
           "gptSessions": 0,
           "mult": 1,
           "reference": true
         },
         {
           "name": "Tal",
-          "score": 10.5,
-          "sessions": 7,
+          "score": 20,
+          "sessions": 15,
           "bugs": 0,
-          "webSessions": 4,
-          "mcpSessions": 3,
+          "webSessions": 8,
+          "mcpSessions": 7,
           "gptSessions": 0,
-          "mult": 1.5,
+          "mult": 1.33,
           "reference": true,
           "boss": true
         }
@@ -1309,29 +1309,41 @@
           "2026-08-04": 1
         },
         "Elena": {
-          "2026-08-03": 1
+          "2026-08-03": 1,
+          "2026-08-04": 1
         },
         "Max": {
-          "2026-08-03": 1
+          "2026-08-03": 1,
+          "2026-08-04": 1
         },
         "Meitar": {
-          "2026-08-03": 1
+          "2026-08-03": 1,
+          "2026-08-04": 1
         },
         "Ohad": {
           "2026-08-03": 1
         },
         "Oleg": {
-          "2026-08-03": 1
-        },
-        "Omer": {
           "2026-08-03": 1,
           "2026-08-04": 1
         },
+        "Omer": {
+          "2026-08-03": 1,
+          "2026-08-04": 1,
+          "2026-08-05": 1
+        },
+        "Sveto": {
+          "2026-08-04": 1
+        },
         "Tal": {
-          "2026-08-03": 1
+          "2026-08-03": 1,
+          "2026-08-04": 1,
+          "2026-08-05": 1
         },
         "Shuf": {
-          "2026-08-03": 1
+          "2026-08-03": 1,
+          "2026-08-04": 1,
+          "2026-08-05": 1
         }
       }
     }
