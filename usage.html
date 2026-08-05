@@ -115,6 +115,7 @@ tr:hover td{background:var(--surface2)}
   <div class="tab" data-tab="geography">Geography</div>
   <div class="tab" data-tab="assets">Assets</div>
   <div class="tab" data-tab="queries">Data Requests</div>
+  <div class="tab" data-tab="errors">Errors</div>
   <div class="tab" data-tab="activity">Activity</div>
   <div class="tab" data-tab="engagement">Engagement</div>
 </div>
@@ -196,6 +197,17 @@ tr:hover td{background:var(--surface2)}
   </div>
   <div class="table-wrap"><table id="queryTable"><thead><tr><th>User</th><th>Detail</th><th>Skill / Tool</th><th>Source</th><th>Time</th><th>Status</th></tr></thead><tbody id="queryBody"></tbody></table></div>
 </div>
+<div class="panel" id="panel-errors">
+  <div class="grid" id="errStats" style="margin-bottom:16px"></div>
+  <div class="table-wrap" id="errAcctWrap"><h3>Accounts hitting errors</h3><table id="errAcctTable"><thead><tr><th>Account</th><th class="num">Errors</th><th class="num">Users</th><th>Last</th></tr></thead><tbody id="errAcctBody"></tbody></table></div>
+  <div style="display:flex;gap:12px;align-items:center;margin:16px 0">
+    <select id="errUserFilter" onchange="renderErrors()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
+      <option value="">All accounts</option>
+    </select>
+    <span style="font-size:11px;color:var(--text2)" id="errCount"></span>
+  </div>
+  <div class="table-wrap"><table id="errTable"><thead><tr><th>User</th><th>Account</th><th>What they tried</th><th>Source</th><th>Time</th></tr></thead><tbody id="errBody"></tbody></table></div>
+</div>
 <div class="panel" id="panel-activity">
   <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
     <select id="actUserFilter" onchange="renderActivity()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-width:180px">
@@ -237,6 +249,7 @@ document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click'
   if(t.dataset.tab==='geography')initMap();
   if(t.dataset.tab==='assets')initAssets();
   if(t.dataset.tab==='queries')initQueries();
+  if(t.dataset.tab==='errors')initErrors();
   if(t.dataset.tab==='activity')initActivity();
   if(t.dataset.tab==='engagement')initEngagement();
 })});
@@ -637,6 +650,47 @@ function renderQueryTable(){
   sortTbl(document.getElementById('queryTable'));
 }
 
+// ERRORS TAB
+var errorsInit=false;
+function initErrors(){
+  if(errorsInit)return;errorsInit=true;
+  var log=D.errorLog||[];
+  var accts=D.errorAccounts||[];
+  // headline stats
+  var now=Date.now();
+  var last24=log.filter(function(e){return e.time&&(now-new Date(e.time).getTime())<864e5}).length;
+  var last7=log.filter(function(e){return e.time&&(now-new Date(e.time).getTime())<7*864e5}).length;
+  document.getElementById('errStats').innerHTML=
+    '<div class="card"><div class="label">Errors (last 24h)</div><div class="value" style="color:'+(last24?'var(--red)':'var(--text)')+'">'+last24+'</div></div>'+
+    '<div class="card"><div class="label">Errors (last 7d)</div><div class="value">'+last7+'</div></div>'+
+    '<div class="card"><div class="label">Accounts affected</div><div class="value">'+accts.length+'</div></div>'+
+    '<div class="card"><div class="label">Total (30d)</div><div class="value">'+log.length+'</div></div>';
+  // per-account table
+  document.getElementById('errAcctBody').innerHTML=accts.length?accts.map(function(a){
+    var ts=a.last?new Date(a.last).getTime():0;
+    return '<tr><td>'+(a.account||'—')+'</td><td class="num">'+a.count+'</td><td class="num">'+a.users+'</td><td data-sort-value="'+ts+'">'+fdt(a.last)+'</td></tr>';
+  }).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text2)">No errors</td></tr>';
+  // account filter
+  var sel=document.getElementById('errUserFilter');
+  var seen={};log.forEach(function(e){if(e.account)seen[e.account]=1});
+  Object.keys(seen).sort().forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;sel.appendChild(o)});
+  renderErrors();
+}
+function renderErrors(){
+  var acctF=document.getElementById('errUserFilter').value;
+  var log=(D.errorLog||[]).filter(function(e){return !acctF||e.account===acctF});
+  document.getElementById('errCount').textContent=log.length+' error'+(log.length!==1?'s':'')+' (web-app turns that failed + MCP tool failures, external only, last 30d)';
+  if(!log.length){document.getElementById('errBody').innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text2)">No errors found</td></tr>';return}
+  document.getElementById('errBody').innerHTML=log.map(function(e){
+    var ts=e.time?new Date(e.time).getTime():0;
+    var srcCls=e.source==='Web app'?'error':'internal';
+    var tried=(e.tried||'—').replace(/"/g,'&quot;');
+    var det=e.detail?'<div style="color:var(--text2);font-size:11px;margin-top:2px">'+e.detail.replace(/"/g,'&quot;')+'</div>':'';
+    return '<tr><td>'+e.user+'</td><td>'+(e.account||'—')+'</td><td class="query-text" style="max-width:380px" title="'+tried+'">'+(e.tried||'—')+det+'</td><td><span class="badge '+srcCls+'">'+e.source+'</span></td><td data-sort-value="'+ts+'">'+fdt(e.time)+'</td></tr>';
+  }).join('');
+  sortTbl(document.getElementById('errTable'));
+}
+
 // ACTIVITY TAB
 var activityInit=false,actView='sessions';
 function initActivity(){
@@ -732,6 +786,7 @@ function renderEngagement(){
 // Expose handlers referenced by inline on* attributes (IIFE scope -> global).
 window.setFaPeriod=setFaPeriod;window.setGeoMode=setGeoMode;window.toggleLizo=toggleLizo;window.renderGeoTable=renderGeoTable;window.renderGeoMap=renderGeoMap;window.onGeoAcctChange=onGeoAcctChange;window.renderAssetTable=renderAssetTable;window.renderAssetPins=renderAssetPins;window.onAssetAcctChange=onAssetAcctChange;window.highlightAsset=highlightAsset;window.renderQueryTable=renderQueryTable;
 window.setActView=setActView;window.renderActivity=renderActivity;window.toggleSess=toggleSess;
+window.renderErrors=renderErrors;
 })();
 </script>
 </body>
