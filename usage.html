@@ -708,23 +708,23 @@ function renderActivity(){
   var sessions=(D.activityLog||[]).filter(function(s){return !userF||s.user===userF});
   var head=document.getElementById('actHead'),body=document.getElementById('actBody');
   if(actView==='flat'){
-    head.innerHTML='<tr><th>User</th><th>Company</th><th>Action</th><th>Detail</th><th>Time</th></tr>';
+    head.innerHTML='<tr><th>User</th><th>Source</th><th>Company</th><th>Action</th><th>Detail</th><th>Time</th></tr>';
     var rows=[];
-    sessions.forEach(function(s){s.actions.forEach(function(a){rows.push({user:s.user,company:s.company,name:a.name,detail:a.detail,time:a.time})})});
+    sessions.forEach(function(s){s.actions.forEach(function(a){rows.push({user:s.user,platform:s.platform,company:s.company,name:a.name,detail:a.detail,time:a.time})})});
     rows.sort(function(a,b){return String(b.time||'').localeCompare(String(a.time||''))});
     document.getElementById('actCount').textContent=rows.length+' event'+(rows.length!==1?'s':'');
-    if(!rows.length){body.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text2)">No activity found</td></tr>';return}
-    body.innerHTML=rows.map(function(r){var ts=r.time?new Date(r.time).getTime():0;return '<tr><td>'+r.user+'</td><td>'+(r.company||'—')+'</td><td>'+r.name+'</td><td style="color:var(--text2);font-size:11px">'+(r.detail||'')+'</td><td data-sort-value="'+ts+'">'+fdt(r.time)+'</td></tr>'}).join('');
+    if(!rows.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No activity found</td></tr>';return}
+    body.innerHTML=rows.map(function(r){var ts=r.time?new Date(r.time).getTime():0;return '<tr><td>'+r.user+'</td><td>'+platBadge(r.platform)+'</td><td>'+(r.company||'—')+'</td><td>'+r.name+'</td><td style="color:var(--text2);font-size:11px">'+(r.detail||'')+'</td><td data-sort-value="'+ts+'">'+fdt(r.time)+'</td></tr>'}).join('');
     sortTbl(document.getElementById('actTable'));
   } else {
-    head.innerHTML='<tr><th>User</th><th>Company</th><th>Session start</th><th>Duration</th><th># actions</th><th>Flow</th></tr>';
+    head.innerHTML='<tr><th>User</th><th>Source</th><th>Company</th><th>Session start</th><th>Duration</th><th># actions</th><th>Flow</th></tr>';
     document.getElementById('actCount').textContent=sessions.length+' session'+(sessions.length!==1?'s':'');
-    if(!sessions.length){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text2)">No sessions found</td></tr>';return}
+    if(!sessions.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text2)">No sessions found</td></tr>';return}
     body.innerHTML=sessions.map(function(s,i){
       var ts=s.start?new Date(s.start).getTime():0;
       var dur=s.durationMin>0?s.durationMin+'m':'<1m';
       var steps=s.actions.map(function(a){return '<div style="padding:2px 0;font-size:12px"><span style="color:var(--text2)">'+fdt(a.time)+'</span> — '+a.name+(a.detail?' <span style="color:var(--text2);font-size:11px">'+a.detail+'</span>':'')+'</div>'}).join('');
-      return '<tr style="cursor:pointer" onclick="toggleSess('+i+')"><td>'+s.user+'</td><td>'+(s.company||'—')+'</td>'+
+      return '<tr style="cursor:pointer" onclick="toggleSess('+i+')"><td>'+s.user+'</td><td>'+platBadge(s.platform)+'</td><td>'+(s.company||'—')+'</td>'+
         '<td data-sort-value="'+ts+'">'+fdt(s.start)+'</td>'+
         '<td data-sort-value="'+s.durationMin+'">'+dur+'</td>'+
         '<td>'+s.count+'</td>'+
@@ -736,6 +736,7 @@ function renderActivity(){
   }
 }
 function toggleSess(i){var r=document.getElementById('sess'+i);if(r)r.style.display=r.style.display==='none'?'':'none';}
+function platBadge(p){var c=p==='Claude'?'#D97706':(p==='ChatGPT'?'#10A37F':'#7C3AED');var t=p||'Web';return '<span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;color:#fff;background:'+c+'">'+t+'</span>';}
 
 var engInit=false;
 function initEngagement(){if(engInit)return;engInit=true;renderEngagement();}
